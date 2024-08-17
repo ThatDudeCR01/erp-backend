@@ -1,0 +1,5 @@
+const tipoProductoSchema = new mongoose.Schema({
+    nombre: String
+});
+
+const TipoProducto = mongoose.model('TipoProducto', tipoProductoSchema);
