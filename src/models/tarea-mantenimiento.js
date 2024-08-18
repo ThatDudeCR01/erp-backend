@@ -1,6 +1,9 @@
-const tareasMantenimientoSchema = new mongoose.Schema({
-    nombre: String,
-    tipo: String
+const tareaMantenimientoSchema = new mongoose.Schema({
+  nombre: { type: String, required: true },
+  tipo: { type: String, required: true },
 });
 
-const TareasMantenimiento = mongoose.model('TareasMantenimiento', tareasMantenimientoSchema);
+const TareaMantenimiento = mongoose.model(
+  "TareaMantenimiento",
+  tareaMantenimientoSchema
+);

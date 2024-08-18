@@ -1,8 +1,12 @@
 const proyectoSchema = new mongoose.Schema({
-    nombre: String,
-    duracion: Number,
-    descripcion: String,
-    empresa_id: mongoose.Schema.Types.ObjectId
+  nombre: String,
+  duracion: Number,
+  descripcion: String,
+  empresa_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Empresa",
+    required: true,
+  },
 });
 
-const Proyecto = mongoose.model('Proyecto', proyectoSchema);
+const Proyecto = mongoose.model("Proyecto", proyectoSchema);
