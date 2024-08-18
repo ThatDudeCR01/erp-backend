@@ -1,7 +1,9 @@
 const productoSchema = new mongoose.Schema({
-    nombre: String,
-    precio: Number,
-    tipo: [String]
+  nombre: { type: String, required: true },
+  precio: { type: Number, required: true },
+  tipo: { type: [String], required: true },
 });
 
-const Producto = mongoose.model('Producto', productoSchema);
+const Producto = mongoose.model("Producto", productoSchema);
+
+//revisar

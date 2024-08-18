@@ -1,9 +1,9 @@
 const entidadSchema = new mongoose.Schema({
-    nombre: String,
-    apellido: String,
-    correo: String,
-    cedula: String,
-    telefono: String
+  nombre: { type: String, required: true },
+  apellido: { type: String, required: true },
+  correo: { type: String, required: true },
+  telefono: { type: String, required: true },
+  cedula: { type: String, required: true },
 });
 
-const Entidad = mongoose.model('Entidad', entidadSchema);
+const Entidad = mongoose.model("Entidad", entidadSchema);
