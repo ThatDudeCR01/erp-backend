@@ -1,65 +1,32 @@
 const express = require("express");
-const Empresa = require("../models/empresa");
+const empresa = require("../controllers/empresa");
 const router = express.Router();
+const { validationResult } = require("express-validator");
+const empresaValidacion = require("../validators/empresa");
 
-// Crear un nuevo empresa
-router.post("/", async (req, res) => {
-  try {
-    const empresa = new Empresa(req.body);
-    await empresa.save();
-    res.status(201).json(empresa);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+router.get("/", empresa.getAllEmpresas);
+
+// Ruta para crear una nueva empresa, aplicando las validaciones
+router.post("/", empresaValidacion, (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
+  empresa.createEmpresa(req, res, next);
 });
 
-// Leer todos los empresas
-router.get("/", async (req, res) => {
-  try {
-    const empresas = await Empresa.find();
-    res.json(empresas);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+router.get("/:id", empresa.getEmpresaById);
+
+// Actualizar una empresa
+router.put("/:id", empresaValidacion, (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
+  empresa.updateEmpresa(req, res, next);
 });
 
-// Leer un empresa por ID
-router.get("/:id", async (req, res) => {
-  try {
-    const empresa = await Empresa.findById(req.params.id);
-    if (!empresa)
-      return res.status(404).json({ error: "empresa no encontrado" });
-    res.json(empresa);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Actualizar un empresa por ID
-router.put("/:id", async (req, res) => {
-  try {
-    const empresa = await Empresa.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    if (!empresa)
-      return res.status(404).json({ error: "empresa no encontrado" });
-    res.json(empresa);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-// Eliminar un empresa por ID
-router.delete("/:id", async (req, res) => {
-  try {
-    const empresa = await Empresa.findByIdAndDelete(req.params.id);
-    if (!empresa)
-      return res.status(404).json({ error: "empresa no encontrado" });
-    res.json({ message: "empresa eliminado" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Eliminar una empresa
+router.delete("/:id", empresa.deleteEmpresa);
 
 module.exports = router;

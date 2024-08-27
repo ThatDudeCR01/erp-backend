@@ -1,65 +1,29 @@
 const express = require("express");
-const Contacto = require("../models/contacto");
+const contacto = require("../controllers/contacto");
 const router = express.Router();
+const { validationResult } = require("express-validator");
+const contactoValidacion = require("../validators/contacto");
 
-// Crear un nuevo contacto
-router.post("/", async (req, res) => {
-  try {
-    const contacto = new Contacto(req.body);
-    await contacto.save();
-    res.status(201).json(contacto);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+router.get("/", contacto.getAllContactos);
+
+// Ruta para crear un nuevo contacto, aplicando las validaciones
+router.post("/", contactoValidacion, (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
+  contacto.createcontacto(req, res, next);
 });
 
-// Leer todos los contactos
-router.get("/", async (req, res) => {
-  try {
-    const contactos = await Contacto.find();
-    res.json(contactos);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+router.get("/:id", contacto.getContactoById);
 
-// Leer un contacto por ID
-router.get("/:id", async (req, res) => {
-  try {
-    const contacto = await Contacto.findById(req.params.id);
-    if (!contacto)
-      return res.status(404).json({ error: "Contacto no encontrado" });
-    res.json(contacto);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+router.put("/:id", contactoValidacion, (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
+  contacto.updatecontacto(req, res, next);
 });
-
-// Actualizar un contacto por ID
-router.put("/:id", async (req, res) => {
-  try {
-    const contacto = await Contacto.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    if (!contacto)
-      return res.status(404).json({ error: "Contacto no encontrado" });
-    res.json(contacto);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-// Eliminar un contacto por ID
-router.delete("/:id", async (req, res) => {
-  try {
-    const contacto = await Contacto.findByIdAndDelete(req.params.id);
-    if (!contacto)
-      return res.status(404).json({ error: "Contacto no encontrado" });
-    res.json({ message: "Contacto eliminado" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+router.delete("/:id", contacto.deleteContacto);
 
 module.exports = router;

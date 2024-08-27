@@ -1,65 +1,32 @@
 const express = require("express");
-const Template = require("../models/template");
+const template = require("../controllers/template");
 const router = express.Router();
+const { validationResult } = require("express-validator");
+const templateValidacion = require("../validators/template");
 
-// Crear un nuevo template
-router.post("/", async (req, res) => {
-  try {
-    const template = new Template(req.body);
-    await template.save();
-    res.status(201).json(template);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+router.get("/", template.getAllTemplates);
+
+// Ruta para crear un nuevo template, aplicando las validaciones
+router.post("/", templateValidacion, (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
+  template.createTemplate(req, res, next);
 });
 
-// Leer todos los templates
-router.get("/", async (req, res) => {
-  try {
-    const templates = await Template.find();
-    res.json(templates);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+router.get("/:id", template.getTemplateById);
+
+// Actualizar template
+router.put("/:id", templateValidacion, (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
+  template.updateTemplate(req, res, next);
 });
 
-// Leer un template por ID
-router.get("/:id", async (req, res) => {
-  try {
-    const template = await Template.findById(req.params.id);
-    if (!template)
-      return res.status(404).json({ error: "template no encontrado" });
-    res.json(template);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Actualizar un template por ID
-router.put("/:id", async (req, res) => {
-  try {
-    const template = await Template.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    if (!template)
-      return res.status(404).json({ error: "template no encontrado" });
-    res.json(template);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-// Eliminar un template por ID
-router.delete("/:id", async (req, res) => {
-  try {
-    const template = await Template.findByIdAndDelete(req.params.id);
-    if (!template)
-      return res.status(404).json({ error: "template no encontrado" });
-    res.json({ message: "template eliminado" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Eliminar template
+router.delete("/:id", template.deleteTemplate);
 
 module.exports = router;

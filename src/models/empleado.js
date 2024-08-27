@@ -1,11 +1,32 @@
+const mongoose = require("mongoose");
+const Entidad = require("./entidad");
+
 const empleadoSchema = new mongoose.Schema({
-  nombre: { type: String, required: true },
-  apellido: { type: String, required: true },
-  correo: { type: String, required: true },
-  telefono: { type: String, required: true },
-  cedula: { type: String, required: true },
+  puesto: { type: String, required: true },
+  salario: { type: Number, required: true },
+  roles: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "TipoEmpleado",
+      required: true,
+    },
+  ],
 });
 
-const Empleado = mongoose.model("Empleado", empleadoSchema);
+const Empleado = Entidad.discriminator("Empleado", empleadoSchema);
 
-//cedula es un number o string??
+module.exports = Empleado;
+
+/*roles: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Roles",
+      required: true,
+    },
+  ],
+  solicitudes: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Solicitud",
+    },
+  ],*/

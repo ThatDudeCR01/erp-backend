@@ -1,66 +1,32 @@
 const express = require("express");
-const Solicitudes = require("../models/solicitudes");
+const solicitud = require("../controllers/solicitud");
 const router = express.Router();
+const { validationResult } = require("express-validator");
+const solicitudValidacion = require("../validators/solicitud");
 
-// Crear un nuevo solicitudes
-router.post("/", async (req, res) => {
-  try {
-    const solicitudes = new Solicitudes(req.body);
-    await solicitudes.save();
-    res.status(201).json(solicitudes);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+router.get("/", solicitud.getAllSolicitudes);
+
+// Ruta para crear una nueva solicitud, aplicando las validaciones
+router.post("/", solicitudValidacion, (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
+  solicitud.createSolicitud(req, res, next);
 });
 
-// Leer todos los solicitudess
-router.get("/", async (req, res) => {
-  try {
-    const solicitudess = await Solicitudes.find();
-    res.json(solicitudess);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+router.get("/:id", solicitud.getSolicitudById);
+
+// Actualizar solicitud
+router.put("/:id", solicitudValidacion, (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
+  solicitud.updateSolicitud(req, res, next);
 });
 
-// Leer un solicitudes por ID
-router.get("/:id", async (req, res) => {
-  try {
-    const solicitudes = await Solicitudes.findById(req.params.id);
-    if (!solicitudes)
-      return res.status(404).json({ error: "solicitudes no encontrado" });
-    res.json(solicitudes);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Actualizar un solicitudes por ID
-router.put("/:id", async (req, res) => {
-  try {
-    const solicitudes = await Solicitudes.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-    if (!solicitudes)
-      return res.status(404).json({ error: "solicitudes no encontrado" });
-    res.json(solicitudes);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-// Eliminar un solicitudes por ID
-router.delete("/:id", async (req, res) => {
-  try {
-    const solicitudes = await Solicitudes.findByIdAndDelete(req.params.id);
-    if (!solicitudes)
-      return res.status(404).json({ error: "solicitudes no encontrado" });
-    res.json({ message: "solicitudes eliminado" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Eliminar solicitud
+router.delete("/:id", solicitud.deleteSolicitud);
 
 module.exports = router;

@@ -1,65 +1,32 @@
 const express = require("express");
-const Proyecto = require("../models/proyecto");
+const proyecto = require("../controllers/proyecto");
 const router = express.Router();
+const { validationResult } = require("express-validator");
+const proyectoValidacion = require("../validators/proyecto");
 
-// Crear un nuevo proyecto
-router.post("/", async (req, res) => {
-  try {
-    const proyecto = new Proyecto(req.body);
-    await proyecto.save();
-    res.status(201).json(proyecto);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+router.get("/", proyecto.getAllProyectos);
+
+// Ruta para crear un nuevo proyecto, aplicando las validaciones
+router.post("/", proyectoValidacion, (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
+  proyecto.createProyecto(req, res, next);
 });
 
-// Leer todos los proyectos
-router.get("/", async (req, res) => {
-  try {
-    const proyectos = await Proyecto.find();
-    res.json(proyectos);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+router.get("/:id", proyecto.getProyectoById);
+
+// Actualizar proyecto
+router.put("/:id", proyectoValidacion, (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
+  proyecto.updateProyecto(req, res, next);
 });
 
-// Leer un proyecto por ID
-router.get("/:id", async (req, res) => {
-  try {
-    const proyecto = await Proyecto.findById(req.params.id);
-    if (!proyecto)
-      return res.status(404).json({ error: "proyecto no encontrado" });
-    res.json(proyecto);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Actualizar un proyecto por ID
-router.put("/:id", async (req, res) => {
-  try {
-    const proyecto = await Proyecto.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    if (!proyecto)
-      return res.status(404).json({ error: "proyecto no encontrado" });
-    res.json(proyecto);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-// Eliminar un proyecto por ID
-router.delete("/:id", async (req, res) => {
-  try {
-    const proyecto = await Proyecto.findByIdAndDelete(req.params.id);
-    if (!proyecto)
-      return res.status(404).json({ error: "proyecto no encontrado" });
-    res.json({ message: "proyecto eliminado" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Eliminar proyecto
+router.delete("/:id", proyecto.deleteProyecto);
 
 module.exports = router;

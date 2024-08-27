@@ -1,66 +1,32 @@
 const express = require("express");
-const TipoProducto = require("../models/tipo-producto");
+const tipoProducto = require("../controllers/tipoProducto");
 const router = express.Router();
+const { validationResult } = require("express-validator");
+const tipoProductoValidacion = require("../validators/tipoProducto");
 
-// Crear un nuevo tipoProducto
-router.post("/", async (req, res) => {
-  try {
-    const tipoProducto = new TipoProducto(req.body);
-    await tipoProducto.save();
-    res.status(201).json(tipoProducto);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+router.get("/", tipoProducto.getAllTiposProducto);
+
+// Ruta para crear un nuevo tipo de producto, aplicando las validaciones
+router.post("/", tipoProductoValidacion, (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
+  tipoProducto.createTipoProducto(req, res, next);
 });
 
-// Leer todos los tipoProductos
-router.get("/", async (req, res) => {
-  try {
-    const tipoProductos = await TipoProducto.find();
-    res.json(tipoProductos);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+router.get("/:id", tipoProducto.getTipoProductoById);
+
+// Actualizar tipo de producto
+router.put("/:id", tipoProductoValidacion, (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
+  tipoProducto.updateTipoProducto(req, res, next);
 });
 
-// Leer un tipoProducto por ID
-router.get("/:id", async (req, res) => {
-  try {
-    const tipoProducto = await tipoProducto.findById(req.params.id);
-    if (!tipoProducto)
-      return res.status(404).json({ error: "tipoProducto no encontrado" });
-    res.json(tipoProducto);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Actualizar un tipoProducto por ID
-router.put("/:id", async (req, res) => {
-  try {
-    const tipoProducto = await TipoProducto.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-    if (!tipoProducto)
-      return res.status(404).json({ error: "tipoProducto no encontrado" });
-    res.json(tipoProducto);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-// Eliminar un tipoProducto por ID
-router.delete("/:id", async (req, res) => {
-  try {
-    const tipoProducto = await TipoProducto.findByIdAndDelete(req.params.id);
-    if (!tipoProducto)
-      return res.status(404).json({ error: "tipoProducto no encontrado" });
-    res.json({ message: "tipoProducto eliminado" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Eliminar tipo de producto
+router.delete("/:id", tipoProducto.deleteTipoProducto);
 
 module.exports = router;

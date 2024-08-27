@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+
 const templateSchema = new mongoose.Schema({
   nombre: { type: String, required: true },
   tareasMantenimiento: {
@@ -8,3 +10,4 @@ const templateSchema = new mongoose.Schema({
 });
 
 const Template = mongoose.model("Template", templateSchema);
+module.exports = Template;

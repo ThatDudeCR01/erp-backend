@@ -1,5 +1,0 @@
-const tipoProductoSchema = new mongoose.Schema({
-  nombre: { type: String, required: true },
-});
-
-const TipoProducto = mongoose.model("TipoProducto", tipoProductoSchema);
