@@ -1,8 +1,16 @@
+const mongoose = require("mongoose");
+const Entidad = require("./entidad");
+
 const contactoSchema = new mongoose.Schema({
-    nombre: { type: String, required: true },
-    apellido: { type: String, required: true },
-    correo: { type: String, required: true },
-    telefono: { type: String, required: true }
+  entidad_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Entidad",
+    required: true,
+  }, // Referencia a la entidad asociada al contacto
 });
 
-const Contacto = mongoose.model('Contacto', contactoSchema);
+const Contacto = Entidad.discriminator("Contacto", contactoSchema);
+
+module.exports = Contacto;
+
+//Listo

@@ -1,74 +1,32 @@
 const express = require("express");
-const HorasFacturables = require("../models/horasFacturables");
+const horasFacturables = require("../controllers/horas-facturable");
 const router = express.Router();
+const { validationResult } = require("express-validator");
+const horasFacturablesValidacion = require("../validators/horasFacturables");
 
-// Crear una nueva hora facturable
-router.post("/", async (req, res) => {
-  try {
-    const horasFacturables = new HorasFacturables(req.body);
-    await horasFacturables.save();
-    res.status(201).json(horasFacturables);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+router.get("/", horasFacturables.getAllHorasFacturables);
+
+// Ruta para crear nuevas horas facturables, aplicando las validaciones
+router.post("/", horasFacturablesValidacion, (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
+  horasFacturables.createHorasFacturables(req, res, next);
 });
 
-// Leer todas las horas facturables
-router.get("/", async (req, res) => {
-  try {
-    const horasFacturables = await HorasFacturables.find();
-    res.json(horasFacturables);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+router.get("/:id", horasFacturables.getHorasFacturablesById);
+
+// Actualizar horas facturables
+router.put("/:id", (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
+  horasFacturables.updateHorasFacturables(req, res, next);
 });
 
-// Leer una hora facturable por ID
-router.get("/:id", async (req, res) => {
-  try {
-    const horasFacturables = await HorasFacturables.findById(req.params.id);
-    if (!horasFacturables)
-      return res
-        .status(404)
-        .json({ error: "Horas facturables no encontradas" });
-    res.json(horasFacturables);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Actualizar una hora facturable por ID
-router.put("/:id", async (req, res) => {
-  try {
-    const horasFacturables = await HorasFacturables.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-    if (!horasFacturables)
-      return res
-        .status(404)
-        .json({ error: "Horas facturables no encontradas" });
-    res.json(horasFacturables);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-// Eliminar una hora facturable por ID
-router.delete("/:id", async (req, res) => {
-  try {
-    const horasFacturables = await HorasFacturables.findByIdAndDelete(
-      req.params.id
-    );
-    if (!horasFacturables)
-      return res
-        .status(404)
-        .json({ error: "Horas facturables no encontradas" });
-    res.json({ message: "Horas facturables eliminadas" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Eliminar horas facturables
+router.delete("/:id", horasFacturables.deleteHorasFacturables);
 
 module.exports = router;

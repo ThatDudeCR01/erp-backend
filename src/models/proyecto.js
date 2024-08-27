@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+
 const proyectoSchema = new mongoose.Schema({
   nombre: String,
   duracion: Number,
@@ -10,3 +12,4 @@ const proyectoSchema = new mongoose.Schema({
 });
 
 const Proyecto = mongoose.model("Proyecto", proyectoSchema);
+module.exports = Proyecto;

@@ -1,76 +1,32 @@
 const express = require("express");
-const TareasMantenimientos = require("../models/tarea-tareasMantenimiento");
+const tareaMantenimiento = require("../controllers/tareaMantenimiento");
 const router = express.Router();
+const { validationResult } = require("express-validator");
+const tareaMantenimientoValidacion = require("../validators/tareaMantenimiento");
 
-// Crear un nuevo tareasMantenimiento
-router.post("/", async (req, res) => {
-  try {
-    const tareasMantenimientos = new TareasMantenimientos(req.body);
-    await tareasMantenimientos.save();
-    res.status(201).json(tareasMantenimientos);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+router.get("/", tareaMantenimiento.getAllTareasMantenimiento);
+
+// Ruta para crear una nueva tarea de mantenimiento, aplicando las validaciones
+router.post("/", tareaMantenimientoValidacion, (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
+  tareaMantenimiento.createTareaMantenimiento(req, res, next);
 });
 
-// Leer todos los tareasMantenimientos
-router.get("/", async (req, res) => {
-  try {
-    const tareasMantenimientos = await TareasMantenimientos.find();
-    res.json(tareasMantenimientos);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+router.get("/:id", tareaMantenimiento.getTareaMantenimientoById);
+
+// Actualizar tarea de mantenimiento
+router.put("/:id", tareaMantenimientoValidacion, (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
+  tareaMantenimiento.updateTareaMantenimiento(req, res, next);
 });
 
-// Leer un tareasMantenimiento por ID
-router.get("/:id", async (req, res) => {
-  try {
-    const tareasMantenimientos = await TareasMantenimientos.findById(
-      req.params.id
-    );
-    if (!tareasMantenimientos)
-      return res
-        .status(404)
-        .json({ error: "tareasMantenimiento no encontrado" });
-    res.json(tareasMantenimientos);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Actualizar un tareasMantenimiento por ID
-router.put("/:id", async (req, res) => {
-  try {
-    const tareasMantenimientos = await TareasMantenimientos.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-    if (!tareasMantenimientos)
-      return res
-        .status(404)
-        .json({ error: "tareasMantenimiento no encontrado" });
-    res.json(tareasMantenimientos);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-// Eliminar un tareasMantenimiento por ID
-router.delete("/:id", async (req, res) => {
-  try {
-    const tareasMantenimientos = await TareasMantenimientos.findByIdAndDelete(
-      req.params.id
-    );
-    if (!tareasMantenimientos)
-      return res
-        .status(404)
-        .json({ error: "tareasMantenimiento no encontrado" });
-    res.json({ message: "tareasMantenimiento eliminado" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Eliminar tarea de mantenimiento
+router.delete("/:id", tareaMantenimiento.deleteTareaMantenimiento);
 
 module.exports = router;
