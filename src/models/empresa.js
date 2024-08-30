@@ -9,6 +9,11 @@ const empresaSchema = new mongoose.Schema({
     ref: "Mantenimiento",
     required: true,
   },
+  cliente_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Cliente",
+    required: true,
+  },
 });
 
 const Empresa = mongoose.model("Empresa", empresaSchema);

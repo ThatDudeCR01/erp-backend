@@ -2,13 +2,13 @@ const Contacto = require("../models/contacto");
 
 exports.createContacto = async (req, res) => {
   try {
-    const { nombre, apellido, correo, telefono, entidad } = req.body;
+    const { nombre, telefono, correo, identificacion, entidad } = req.body;
 
     const nuevoContacto = new Contacto({
       nombre,
-      apellido,
-      correo,
       telefono,
+      correo,
+      identificacion,
       entidad,
     });
 

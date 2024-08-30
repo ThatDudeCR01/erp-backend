@@ -2,13 +2,11 @@ const Solicitud = require("../models/solicitudes");
 
 exports.createSolicitud = async (req, res) => {
   try {
-    const { nombre, fecha, estaAprobada, empleadoSolicita, usuario_id } =
-      req.body;
+    const { nombre, fecha, empleadoSolicita, usuario_id } = req.body;
 
     const nuevaSolicitud = new Solicitud({
       nombre,
       fecha,
-      estaAprobada,
       empleadoSolicita,
       usuario_id,
     });
