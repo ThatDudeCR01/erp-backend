@@ -4,7 +4,7 @@ const tipoProductoSchema = new mongoose.Schema({
   nombre: { type: String, required: true },
   unidad: { type: String, required: true },
   descripcion: { type: String, required: false },
-  producto: {
+  producto_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Producto",
     required: true,

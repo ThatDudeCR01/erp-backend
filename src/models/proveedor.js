@@ -1,8 +1,10 @@
 const mongoose = require("mongoose");
-const Entidad = require("./entidad");
 
 const proveedorSchema = new mongoose.Schema({
-  empresa: { type: String, required: true }, // Nombre de la empresa del proveedor
+  nombre: { type: String, required: true },
+  correo: { type: String, required: true, unique: true },
+  telefono: { type: String, required: false },
+  identificacion: { type: String, required: true },
   entidad_id: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -11,6 +13,6 @@ const proveedorSchema = new mongoose.Schema({
   ],
 });
 
-const Proveedor = Entidad.discriminator("Proveedor", proveedorSchema);
+const Proveedor = mongoose.model("Proveedor", proveedorSchema);
 
 module.exports = Proveedor;

@@ -2,13 +2,11 @@ const Empleado = require("../models/empleado");
 
 exports.createEmpleado = async (req, res) => {
   try {
-    const { nombre, apellido, correo, telefono, puesto, salario, entidad } =
-      req.body;
+    const { nombre, apellido, telefono, puesto, salario, entidad } = req.body;
 
     const nuevoEmpleado = new Empleado({
       nombre,
       apellido,
-      correo,
       telefono,
       puesto,
       salario,
@@ -71,7 +69,7 @@ exports.getEmpleadoById = async (req, res) => {
     if (!empleado) {
       return res.status(404).json({ message: "Empleado no encontrado" });
     }
-    res.status(200).json({ message: "Empleado encontrado" });
+    res.status(200).json({ message: "Empleado encontrado", empleado });
   } catch (error) {
     res
       .status(500)

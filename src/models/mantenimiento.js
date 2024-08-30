@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const mantenimientoSchema = new mongoose.Schema({
-  id_empresa: {
+  empresa_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Empresa",
     required: true,
