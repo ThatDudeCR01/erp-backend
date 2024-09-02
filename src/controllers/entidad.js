@@ -1,8 +1,19 @@
 const Entidad = require("../models/entidad");
+const handleValidationErrors = require("../config/validateResult");
 
 exports.createEntidad = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
-    const { nombre, apellido, correo, telefono, cedula, usuario } = req.body;
+    const { nombre, apellido, correo, telefono, cedula } = req.body;
+
+    const checkEntidad = await Entidad.findOne({ correo });
+    if (checkEntidad) {
+      return res.status(400).json({
+        message: "Ya existe una entidad con el correo proporcionado",
+      });
+    }
 
     const nuevaEntidad = new Entidad({
       nombre,
@@ -10,7 +21,6 @@ exports.createEntidad = async (req, res) => {
       correo,
       telefono,
       cedula,
-      usuario,
     });
 
     await nuevaEntidad.save();
@@ -69,7 +79,7 @@ exports.getEntidadById = async (req, res) => {
     if (!entidad) {
       return res.status(404).json({ message: "Entidad no encontrada" });
     }
-    res.status(200).json({ message: "Entidad encontrada" });
+    res.status(200).json(entidad);
   } catch (error) {
     res
       .status(500)
@@ -79,55 +89,14 @@ exports.getEntidadById = async (req, res) => {
 
 exports.updateEntidad = async (req, res) => {
   try {
-    const { nombre, apellido, correo, telefono, cedula, usuario } = req.body;
-
     const entidadActual = await Entidad.findById(req.params.id);
     if (!entidadActual) {
       return res.status(404).json({ message: "Entidad no encontrada" });
     }
 
-    const updates = {};
-    let isModified = false;
-
-    if (nombre && nombre !== entidadActual.nombre) {
-      updates.nombre = nombre;
-      isModified = true;
-    }
-
-    if (apellido && apellido !== entidadActual.apellido) {
-      updates.apellido = apellido;
-      isModified = true;
-    }
-
-    if (correo && correo !== entidadActual.correo) {
-      updates.correo = correo;
-      isModified = true;
-    }
-
-    if (telefono && telefono !== entidadActual.telefono) {
-      updates.telefono = telefono;
-      isModified = true;
-    }
-
-    if (cedula && cedula !== entidadActual.cedula) {
-      updates.cedula = cedula;
-      isModified = true;
-    }
-
-    if (usuario && usuario.toString() !== entidadActual.usuario.toString()) {
-      updates.usuario = usuario;
-      isModified = true;
-    }
-
-    if (!isModified) {
-      return res.status(200).json({
-        message: "La información es la misma, no se realizaron cambios.",
-      });
-    }
-
     const entidad = await Entidad.findByIdAndUpdate(
       req.params.id,
-      { $set: updates },
+      { $set: req.body },
       {
         new: true,
         runValidators: true,

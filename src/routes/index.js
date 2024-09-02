@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const auth = require("../middleware/auth");
+const { verifyToken } = require("../middleware/auth");
 
 const login = require("./login");
 
@@ -21,25 +21,29 @@ const mantenimiento = require("./mantenimientos");
 const template = require("./templates");
 const tipoProducto = require("./tipoProductos");
 
-//rutas publicas
-router.use("/login", login);
+// //rutas publicas
+// router.use("/login", login);
+
+// router.use(verifyToken);
 
 //rutas privadas
-router.use("/clientes", auth, cliente);
-router.use("/usuarios", auth, usuario);
-router.use("/contactos", auth, contacto);
-router.use("/empleados", auth, empleado);
-router.use("/empresas", auth, empresa);
-router.use("/entidades", auth, entidad);
-router.use("/horasFacturables", auth, horasFacturables);
-router.use("/mantenimientos", auth, mantenimiento);
-router.use("/productos", auth, producto);
-router.use("/proveedores", auth, proveedor);
-router.use("/proyectos", auth, proyecto);
-router.use("/roles", auth, roles);
-router.use("/solicitudes", auth, solicitud);
-router.use("/tareasMantenimientos", auth, tareasManteniento);
-router.use("/templates", auth, template);
-router.use("/tipoProductos", auth, tipoProducto);
+
+router.use("/entidades", entidad);
+router.use("/usuarios", usuario);
+
+// router.use("/clientes", cliente);
+// router.use("/contactos", contacto);
+// router.use("/empleados", empleado);
+// router.use("/empresas", empresa);
+// router.use("/horasFacturables", horasFacturables);
+// router.use("/mantenimientos", mantenimiento);
+// router.use("/productos", producto);
+// router.use("/proveedores", proveedor);
+// router.use("/proyectos", proyecto);
+// router.use("/roles", roles);
+// router.use("/solicitudes", solicitud);
+// router.use("/tareasMantenimientos", tareasManteniento);
+// router.use("/templates", template);
+// router.use("/tipoProductos", tipoProducto);
 
 module.exports = router;

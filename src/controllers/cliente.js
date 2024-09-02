@@ -1,8 +1,17 @@
 const Cliente = require("../models/cliente");
+const handleValidationErrors = require("../config/validateResult");
 
-exports.createCliente = async (req, res) => {
+const createCliente = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
+
   try {
     const { nombre, correo, telefono, identificacion, entidad } = req.body;
+    const checkUser = await Cliente.findOne({ correo });
+    if (checkUser) {
+      return res.status(400).json({ message: "El correo ya está en uso" });
+    }
 
     const nuevoCliente = new Cliente({
       nombre,
@@ -21,7 +30,7 @@ exports.createCliente = async (req, res) => {
   }
 };
 
-exports.getAllClientes = async (req, res) => {
+const getAllClientes = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -61,13 +70,13 @@ exports.getAllClientes = async (req, res) => {
   }
 };
 
-exports.getClienteById = async (req, res) => {
+const getClienteById = async (req, res) => {
   try {
     const cliente = await Cliente.findById(req.params.id);
     if (!cliente) {
       return res.status(404).json({ message: "Cliente no encontrado" });
     }
-    res.status(200).json({ message: "Cliente encontrado" });
+    res.status(200).json(cliente);
   } catch (error) {
     res
       .status(500)
@@ -75,59 +84,18 @@ exports.getClienteById = async (req, res) => {
   }
 };
 
-exports.updateCliente = async (req, res) => {
+const updateCliente = async (req, res) => {
   try {
-    const { nombre, apellido, telefono, entidad } = req.body;
+    const checkCliente = await Cliente.findById(req.params.id);
 
-    const clienteActual = await Cliente.findById(req.params.id);
-    if (!clienteActual) {
+    if (!checkCliente) {
       return res.status(404).json({ message: "Cliente no encontrado" });
     }
 
-    const updates = {};
-    let isModified = false;
-
-    if (nombre && nombre !== clienteActual.nombre) {
-      updates.nombre = nombre;
-      isModified = true;
-    }
-
-    if (apellido && apellido !== clienteActual.apellido) {
-      updates.apellido = apellido;
-      isModified = true;
-    }
-
-    if (telefono && telefono !== clienteActual.telefono) {
-      updates.telefono = telefono;
-      isModified = true;
-    }
-
-    if (
-      entidad &&
-      clienteActual.entidad &&
-      entidad.toString() !== clienteActual.entidad.toString()
-    ) {
-      updates.entidad = entidad;
-      isModified = true;
-    } else if (entidad && !clienteActual.entidad) {
-      updates.entidad = entidad;
-      isModified = true;
-    }
-
-    if (!isModified) {
-      return res.status(200).json({
-        message: "La información es la misma, no se realizaron cambios.",
-      });
-    }
-
-    const cliente = await Cliente.findByIdAndUpdate(
-      req.params.id,
-      { $set: updates },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+    await Cliente.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
     res.status(200).json({ message: "Cliente actualizado con éxito" });
   } catch (error) {
@@ -137,16 +105,28 @@ exports.updateCliente = async (req, res) => {
   }
 };
 
-exports.deleteCliente = async (req, res) => {
+const deleteCliente = async (req, res) => {
   try {
-    const cliente = await Cliente.findByIdAndDelete(req.params.id);
-    if (!cliente) {
+    const checkCliente = await Cliente.findById(req.params.id);
+
+    if (!checkCliente) {
       return res.status(404).json({ message: "Cliente no encontrado" });
     }
+
+    await Cliente.findByIdAndDelete(req.params.id);
+
     res.status(200).json({ message: "Cliente eliminado con éxito" });
   } catch (error) {
     res
       .status(500)
       .json({ message: "Error al eliminar cliente", error: error.message });
   }
+};
+
+module.exports = {
+  createCliente,
+  getAllClientes,
+  getClienteById,
+  updateCliente,
+  deleteCliente,
 };

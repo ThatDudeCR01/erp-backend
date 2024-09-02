@@ -1,9 +1,20 @@
 const Usuario = require("../models/usuario");
 const bcrypt = require("bcryptjs");
+const handleValidationErrors = require("../config/validateResult");
 
 exports.createUsuario = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
+
   try {
-    const { nombre, apellido, correo, contraseña, cedula, entidad } = req.body;
+    const { nombre, apellido, correo, contraseña, cedula, entidad_id } =
+      req.body;
+
+    const checkUser = await Usuario.findOne({ correo });
+    if (checkUser) {
+      return res.status(400).json({ message: "El correo ya está en uso" });
+    }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(contraseña, salt);
@@ -14,7 +25,7 @@ exports.createUsuario = async (req, res) => {
       correo,
       contraseña: hashedPassword,
       cedula,
-      entidad,
+      entidad_id,
     });
 
     await nuevoUsuario.save();
@@ -77,7 +88,7 @@ exports.getUsuarioById = async (req, res) => {
     if (!usuario) {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
-    res.status(200).json({ message: "Usuario encontrado" });
+    res.status(200).json(usuario);
   } catch (error) {
     res
       .status(500)

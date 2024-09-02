@@ -1,29 +1,22 @@
 const express = require("express");
-const cliente = require("../controllers/cliente");
+const {
+  createCliente,
+  getAllClientes,
+  updateCliente,
+  getClienteById,
+  deleteCliente,
+} = require("../controllers/cliente");
 const router = express.Router();
-const { validationResult } = require("express-validator");
 const clienteValidacion = require("../validators/cliente");
 
-router.get("/", cliente.getAllClientes);
+router.get("/", getAllClientes);
 
-router.post("/", clienteValidacion, (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  cliente.createCliente(req, res, next);
-});
+router.post("/", createCliente);
 
-router.get("/:id", cliente.getClienteById);
+router.get("/:id", getClienteById);
 
-router.put("/:id", (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  cliente.updateCliente(req, res, next);
-});
+router.put("/:id", updateCliente);
 
-router.delete("/:id", cliente.deleteCliente);
+router.delete("/:id", deleteCliente);
 
 module.exports = router;

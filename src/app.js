@@ -1,6 +1,6 @@
 const express = require("express");
 const connectDB = require("./config/db");
-const routes = require("./routes"); // Importar el index.js desde la carpeta routes
+const routes = require("./routes");
 require("dotenv").config();
 
 const app = express();
@@ -12,9 +12,10 @@ app.use(express.json());
 connectDB();
 
 // Usar las rutas importadas
-app.use("/api", routes);
+app.use(routes);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.NODE_PORT || 3000;
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

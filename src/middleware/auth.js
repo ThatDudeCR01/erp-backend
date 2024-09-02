@@ -1,24 +1,37 @@
 const jwt = require("jsonwebtoken");
 
-// Middleware para verificar JWT
-const auth = (req, res, next) => {
-  // Obtener el token del header
-  const token = req.header("Authorization").replace("Bearer ", "");
-
-  if (!token) {
+exports.verifyToken = (req, res, next) => {
+  if (!req.header("Authorization")) {
     return res
       .status(401)
-      .json({ message: "Acceso denegado. No se encontró el token." });
+      .send({ message: "Access Denied. No token provided." });
+  }
+
+  const token = req.header("Authorization").replace("Bearer ", "");
+  if (!token || token === "") {
+    return res
+      .status(401)
+      .send({ message: "Access Denied. No token provided." });
   }
 
   try {
-    // Verificar el token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Decodificar el token y agregar los datos del usuario a la solicitud
-    next(); // Continuar con la siguiente función middleware o ruta
+    const verified = jwt.verify(token, process.env.NODE_JWT_SECRET);
+    req.user = verified;
+    next();
   } catch (error) {
-    res.status(400).json({ message: "Token inválido." });
+    res.status(400).send({ message: "Invalid Token" });
   }
 };
 
-module.exports = auth;
+exports.checkRoles = (allowedRoles) => {
+  return (req, res, next) => {
+    const hasRole = req.user.roles.some((role) => allowedRoles.includes(role));
+
+    if (!hasRole) {
+      return res.status(403).send({
+        message: "Access Denied. You do not have the necessary roles.",
+      });
+    }
+    next();
+  };
+};
