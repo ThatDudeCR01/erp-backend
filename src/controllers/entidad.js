@@ -94,7 +94,7 @@ exports.updateEntidad = async (req, res) => {
       return res.status(404).json({ message: "Entidad no encontrada" });
     }
 
-    const entidad = await Entidad.findByIdAndUpdate(
+    await Entidad.findByIdAndUpdate(
       req.params.id,
       { $set: req.body },
       {

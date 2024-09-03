@@ -1,25 +1,23 @@
 const express = require("express");
-const { createUsuario } = require("../controllers/usuario");
+const {
+  createUsuario,
+  updateUsuario,
+  getUsuarioById,
+  deleteUsuario,
+  getAllUsuarios,
+} = require("../controllers/usuario");
 const router = express.Router();
 
 const usuarioValidacion = require("../validators/usuario");
 
-// router.get("/", usuario.getAllUsuarios);
+router.get("/", getAllUsuarios);
 
-// Ruta para crear un nuevo usuario, aplicando las validaciones
 router.post("/", usuarioValidacion, createUsuario);
 
-// router.get("/:id", usuario.getUsuarioById);
+router.get("/:id", getUsuarioById);
 
-// //actualizar
-// router.put("/:id", (req, res, next) => {
-//   const errors = validationResult(req);
-//   if (!errors.isEmpty()) {
-//     return res.status(400).json({ errors: errors.array() });
-//   }
-//   usuario.updateUsuario(req, res, next);
-// });
+router.put("/:id", updateUsuario);
 
-// router.delete("/:id", usuario.deleteUsuario);
+router.delete("/:id", deleteUsuario);
 
 module.exports = router;

@@ -30,7 +30,7 @@ const tipoProducto = require("./tipoProductos");
 
 router.use("/entidades", entidad);
 router.use("/usuarios", usuario);
-
+router.use("/roles", roles);
 // router.use("/clientes", cliente);
 // router.use("/contactos", contacto);
 // router.use("/empleados", empleado);
@@ -40,7 +40,7 @@ router.use("/usuarios", usuario);
 // router.use("/productos", producto);
 // router.use("/proveedores", proveedor);
 // router.use("/proyectos", proyecto);
-// router.use("/roles", roles);
+
 // router.use("/solicitudes", solicitud);
 // router.use("/tareasMantenimientos", tareasManteniento);
 // router.use("/templates", template);

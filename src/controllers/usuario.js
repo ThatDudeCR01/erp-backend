@@ -59,6 +59,7 @@ exports.getAllUsuarios = async (req, res) => {
 
     // Obtener usuarios con los criterios de búsqueda, paginación y límites
     const usuarios = await Usuario.find(searchCriteria)
+      .select("id nombre correo")
       .skip(skip)
       .limit(limit)
       .exec();
@@ -84,7 +85,7 @@ exports.getAllUsuarios = async (req, res) => {
 
 exports.getUsuarioById = async (req, res) => {
   try {
-    const usuario = await Usuario.findById(req.params.id);
+    const usuario = await Usuario.findById(req.params.id).select("-contraseña");
     if (!usuario) {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
@@ -100,7 +101,7 @@ exports.updateUsuario = async (req, res) => {
   try {
     const { nombre, apellido, telefono, contraseña, entidad } = req.body;
 
-    const usuarioActual = await Usuario.findById(req.params.id);
+    const usuarioActual = await Usuario.findById(req.param3s.id);
     if (!usuarioActual) {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
