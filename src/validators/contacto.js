@@ -1,52 +1,63 @@
 const { body } = require("express-validator");
 const mongoose = require("mongoose");
 
-const contactoValidacion = [
-  // Validación de los campos heredados de Entidad
-  body("nombre")
-    .notEmpty()
-    .withMessage("El nombre es requerido")
-    .trim()
-    .escape()
-    .isLength({ min: 3, max: 100 })
-    .withMessage("El nombre debe tener entre 3 y 100 caracteres"),
+const validarNombre = body("nombre")
+  .notEmpty()
+  .withMessage("El nombre es requerido")
+  .trim()
+  .escape()
+  .isLength({ min: 3, max: 100 })
+  .withMessage("El nombre debe tener entre 3 y 100 caracteres")
+  .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/)
+  .withMessage("El nombre solo puede contener letras y espacios");
 
-  body("correo")
-    .notEmpty()
-    .withMessage("El correo es requerido")
-    .trim()
-    .isEmail()
-    .withMessage("Debe ser un correo electrónico válido")
-    .normalizeEmail(),
+const validarCorreo = body("correo")
+  .notEmpty()
+  .withMessage("El correo es requerido")
+  .trim()
+  .isEmail()
+  .withMessage("Debe ser un correo electrónico válido")
+  .normalizeEmail();
 
-  body("cedula")
-    .notEmpty()
-    .withMessage("La cédula es requerida")
-    .matches(/^\d+$/)
-    .withMessage("La cédula debe contener solo números")
-    .isLength({ min: 9, max: 12 })
-    .withMessage("La cédula debe tener entre 9 y 12 dígitos"),
+const validarIdentificacion = body("identificacion")
+  .notEmpty()
+  .trim()
+  .withMessage("La cédula es requerida")
+  .matches(/^\d+$/)
+  .withMessage("La cédula debe contener solo números")
+  .isLength({ min: 9, max: 12 })
+  .withMessage("La cédula debe tener entre 9 y 12 dígitos");
 
-  body("usuario")
-    .notEmpty()
-    .withMessage("El ID del usuario es requerido")
-    .custom((value) => {
-      if (!mongoose.Types.ObjectId.isValid(value)) {
-        throw new Error("El ID del usuario no es válido");
-      }
-      return true;
-    }),
+const validarEntidadId = body("entidad_id")
+  .notEmpty()
+  .withMessage("El ID de la entidad es requerido")
+  .custom((value) => {
+    if (!mongoose.Types.ObjectId.isValid(value)) {
+      throw new Error("El ID de la entidad no es válido");
+    }
+    return true;
+  });
 
-  // Validación del campo específico de Contacto
-  body("entidad_id")
-    .notEmpty()
-    .withMessage("El ID de la entidad es requerido")
-    .custom((value) => {
-      if (!mongoose.Types.ObjectId.isValid(value)) {
-        throw new Error("El ID de la entidad no es válido");
-      }
-      return true;
-    }),
+const validarTelefono = body("telefono")
+  .notEmpty()
+  .withMessage("El teléfono es requerido")
+  .trim()
+  .isLength({ min: 8, max: 10 })
+  .withMessage("El teléfono debe tener entre 8 y 15 caracteres")
+  .matches(/^\d+$/)
+  .withMessage("El teléfono solo debe contener números");
+
+const contacto = [
+  validarNombre,
+  validarCorreo,
+  validarIdentificacion,
+  validarEntidadId,
+  validarTelefono,
 ];
 
-module.exports = contactoValidacion;
+const actualizarContacto = [validarNombre, validarTelefono];
+
+module.exports = {
+  contacto,
+  actualizarContacto,
+};

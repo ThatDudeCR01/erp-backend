@@ -1,15 +1,23 @@
 const Contacto = require("../models/contacto");
+const handleValidationErrors = require("../config/validateResult");
 
-exports.createContacto = async (req, res) => {
+const createContacto = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
-    const { nombre, telefono, correo, identificacion, entidad } = req.body;
+    const { nombre, telefono, correo, identificacion, entidad_id } = req.body;
+    const checkContacto = await Contacto.findOne({ correo });
+    if (checkContacto) {
+      return res.status(400).json({ message: "El correo ya está en uso" });
+    }
 
     const nuevoContacto = new Contacto({
       nombre,
       telefono,
       correo,
       identificacion,
-      entidad,
+      entidad_id,
     });
 
     await nuevoContacto.save();
@@ -21,7 +29,7 @@ exports.createContacto = async (req, res) => {
   }
 };
 
-exports.getAllContactos = async (req, res) => {
+const getAllContactos = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -61,13 +69,13 @@ exports.getAllContactos = async (req, res) => {
   }
 };
 
-exports.getContactoById = async (req, res) => {
+const getContactoById = async (req, res) => {
   try {
     const contacto = await Contacto.findById(req.params.id);
     if (!contacto) {
       return res.status(404).json({ message: "Contacto no encontrado" });
     }
-    res.status(200).json({ message: "Contacto encontrado" });
+    res.status(200).json({ message: "Contacto encontrado", contacto });
   } catch (error) {
     res
       .status(500)
@@ -75,51 +83,40 @@ exports.getContactoById = async (req, res) => {
   }
 };
 
-exports.updateContacto = async (req, res) => {
+const updateContacto = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
     const { nombre, apellido, telefono, entidad } = req.body;
-
     const contactoActual = await Contacto.findById(req.params.id);
+
     if (!contactoActual) {
       return res.status(404).json({ message: "Contacto no encontrado" });
     }
 
+    // Definir los campos a actualizar
+    const campos = { nombre, apellido, telefono, entidad };
     const updates = {};
-    let isModified = false;
 
-    if (nombre && nombre !== contactoActual.nombre) {
-      updates.nombre = nombre;
-      isModified = true;
-    }
+    // Recorrer los campos y actualizar solo si hay cambios
+    Object.keys(campos).forEach((key) => {
+      if (
+        campos[key] &&
+        campos[key].toString() !== contactoActual[key]?.toString()
+      ) {
+        updates[key] = campos[key];
+      }
+    });
 
-    if (apellido && apellido !== contactoActual.apellido) {
-      updates.apellido = apellido;
-      isModified = true;
-    }
-
-    if (telefono && telefono !== contactoActual.telefono) {
-      updates.telefono = telefono;
-      isModified = true;
-    }
-
-    if (
-      entidad &&
-      contactoActual.entidad &&
-      entidad.toString() !== contactoActual.entidad.toString()
-    ) {
-      updates.entidad = entidad;
-      isModified = true;
-    } else if (entidad && !contactoActual.entidad) {
-      updates.entidad = entidad;
-      isModified = true;
-    }
-
-    if (!isModified) {
+    // Verificar si hay cambios
+    if (Object.keys(updates).length === 0) {
       return res.status(200).json({
         message: "La información es la misma, no se realizaron cambios.",
       });
     }
 
+    // Actualizar el contacto
     const contacto = await Contacto.findByIdAndUpdate(
       req.params.id,
       { $set: updates },
@@ -137,7 +134,7 @@ exports.updateContacto = async (req, res) => {
   }
 };
 
-exports.deleteContacto = async (req, res) => {
+const deleteContacto = async (req, res) => {
   try {
     const contacto = await Contacto.findByIdAndDelete(req.params.id);
     if (!contacto) {
@@ -149,4 +146,12 @@ exports.deleteContacto = async (req, res) => {
       .status(500)
       .json({ message: "Error al eliminar contacto", error: error.message });
   }
+};
+
+module.exports = {
+  createContacto,
+  getAllContactos,
+  getContactoById,
+  updateContacto,
+  deleteContacto,
 };

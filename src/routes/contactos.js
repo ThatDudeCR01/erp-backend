@@ -1,29 +1,22 @@
 const express = require("express");
-const contacto = require("../controllers/contacto");
+const {
+  createContacto,
+  getAllContactos,
+  getContactoById,
+  deleteContacto,
+  updateContacto,
+} = require("../controllers/contacto");
 const router = express.Router();
-const { validationResult } = require("express-validator");
-const contactoValidacion = require("../validators/contacto");
+const { contacto, actualizarContacto } = require("../validators/contacto");
 
-router.get("/", contacto.getAllContactos);
+router.post("/", contacto, createContacto);
 
-// Ruta para crear un nuevo contacto, aplicando las validaciones
-router.post("/", contactoValidacion, (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  contacto.createcontacto(req, res, next);
-});
+router.get("/", getAllContactos);
 
-router.get("/:id", contacto.getContactoById);
+router.get("/:id", getContactoById);
 
-router.put("/:id", contactoValidacion, (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  contacto.updatecontacto(req, res, next);
-});
-router.delete("/:id", contacto.deleteContacto);
+router.put("/:id", actualizarContacto, updateContacto);
+
+router.delete("/:id", deleteContacto);
 
 module.exports = router;
