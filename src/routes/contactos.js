@@ -7,15 +7,18 @@ const {
   updateContacto,
 } = require("../controllers/contacto");
 const router = express.Router();
-const { contacto, actualizarContacto } = require("../validators/contacto");
-
-router.post("/", contacto, createContacto);
+const {
+  contactoValidacion,
+  actualizarContactoValidacion,
+} = require("../validators/contacto");
 
 router.get("/", getAllContactos);
 
 router.get("/:id", getContactoById);
 
-router.put("/:id", actualizarContacto, updateContacto);
+router.post("/", contactoValidacion, createContacto);
+
+router.patch("/:id", actualizarContactoValidacion, updateContacto);
 
 router.delete("/:id", deleteContacto);
 

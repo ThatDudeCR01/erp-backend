@@ -1,32 +1,26 @@
 const express = require("express");
-const empleado = require("../controllers/empleado");
+const {
+  createEmpleado,
+  getAllEmpleados,
+  getEmpleadoById,
+  updateEmpleado,
+  deleteEmpleado,
+} = require("../controllers/empleado");
+
 const router = express.Router();
-const { validationResult } = require("express-validator");
-const empleadoValidacion = require("../validators/empleado");
+const {
+  empleadoValidacion,
+  actualizarEmpleadoValidacion,
+} = require("../validators/empleado");
 
-router.get("/", empleado.getAllEmpleados);
+router.get("/", getAllEmpleados);
 
-// Ruta para crear un nuevo empleado, aplicando las validaciones
-router.post("/", empleadoValidacion, (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  empleado.createEmpleado(req, res, next);
-});
+router.get("/:id", getEmpleadoById);
 
-router.get("/:id", empleado.getEmpleadoById);
+router.post("/", empleadoValidacion, createEmpleado);
 
-// Actualizar un empleado
-router.put("/:id", empleadoValidacion, (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  empleado.updateEmpleado(req, res, next);
-});
+router.patch("/:id", actualizarEmpleadoValidacion, updateEmpleado);
 
-// Eliminar un empleado
-router.delete("/:id", empleado.deleteEmpleado);
+router.delete("/:id", deleteEmpleado);
 
 module.exports = router;

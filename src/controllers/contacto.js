@@ -6,7 +6,7 @@ const createContacto = async (req, res) => {
     return;
   }
   try {
-    const { nombre, telefono, correo, identificacion, entidad_id } = req.body;
+    const { nombre, telefono, correo, cedula, entidad_id } = req.body;
     const checkContacto = await Contacto.findOne({ correo });
     if (checkContacto) {
       return res.status(400).json({ message: "El correo ya está en uso" });
@@ -16,7 +16,7 @@ const createContacto = async (req, res) => {
       nombre,
       telefono,
       correo,
-      identificacion,
+      cedula,
       entidad_id,
     });
 
@@ -48,6 +48,7 @@ const getAllContactos = async (req, res) => {
     };
 
     const contactos = await Contacto.find(searchCriteria)
+      .select("nombre telefono correo -_id")
       .skip(skip)
       .limit(limit)
       .exec();
@@ -75,7 +76,7 @@ const getContactoById = async (req, res) => {
     if (!contacto) {
       return res.status(404).json({ message: "Contacto no encontrado" });
     }
-    res.status(200).json({ message: "Contacto encontrado", contacto });
+    res.status(200).json({ contacto });
   } catch (error) {
     res
       .status(500)
@@ -96,7 +97,7 @@ const updateContacto = async (req, res) => {
     }
 
     // Definir los campos a actualizar
-    const campos = { nombre, apellido, telefono, entidad };
+    const campos = { nombre, apellido, telefono };
     const updates = {};
 
     // Recorrer los campos y actualizar solo si hay cambios

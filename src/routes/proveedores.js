@@ -1,32 +1,26 @@
 const express = require("express");
-const proveedor = require("../controllers/proveedor");
+const {
+  createProveedor,
+  getAllProveedores,
+  getProveedorById,
+  updateProveedor,
+  deleteProveedor,
+} = require("../controllers/proveedor");
 const router = express.Router();
 const { validationResult } = require("express-validator");
-//const proveedorValidacion = require("../validators/proveedor");
+const {
+  proveedorValidacion,
+  actualizarProveedorValidacion,
+} = require("../validators/proveedor");
 
-router.get("/", proveedor.getAllProveedores);
+router.post("/", proveedorValidacion, createProveedor);
 
-// Ruta para crear un nuevo proveedor, aplicando las validaciones
-router.post("/", (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  proveedor.createProveedor(req, res, next);
-});
+router.get("/", getAllProveedores);
 
-router.get("/:id", proveedor.getProveedorById);
+router.get("/:id", getProveedorById);
 
-// Actualizar proveedor
-router.put("/:id", (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  proveedor.updateProveedor(req, res, next);
-});
+router.patch("/:id", actualizarProveedorValidacion, updateProveedor);
 
-// Eliminar proveedor
-router.delete("/:id", proveedor.deleteProveedor);
+router.delete("/:id", deleteProveedor);
 
 module.exports = router;

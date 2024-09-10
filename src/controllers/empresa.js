@@ -1,6 +1,11 @@
 const Empresa = require("../models/empresa");
+const handleValidationErrors = require("../config/validateResult");
+const { getUpdatedFields } = require("../utils/fieldUtils");
 
-exports.createEmpresa = async (req, res) => {
+const createEmpresa = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
     const { nombre, correo, cliente_id, tieneMantenimiento } = req.body;
 
@@ -20,7 +25,7 @@ exports.createEmpresa = async (req, res) => {
   }
 };
 
-exports.getAllEmpresas = async (req, res) => {
+const getAllEmpresas = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -37,6 +42,7 @@ exports.getAllEmpresas = async (req, res) => {
     };
 
     const empresas = await Empresa.find(searchCriteria)
+      .select("nombre correo -_id")
       .skip(skip)
       .limit(limit)
       .exec();
@@ -58,13 +64,15 @@ exports.getAllEmpresas = async (req, res) => {
   }
 };
 
-exports.getEmpresaById = async (req, res) => {
+const getEmpresaById = async (req, res) => {
   try {
-    const empresa = await Empresa.findById(req.params.id);
+    const empresa = await Empresa.findById(req.params.id).select(
+      "nombre correo -_id"
+    );
     if (!empresa) {
       return res.status(404).json({ message: "Empresa no encontrada" });
     }
-    res.status(200).json({ message: "Empresa encontrada" });
+    res.status(200).json({ empresa });
   } catch (error) {
     res
       .status(500)
@@ -72,57 +80,32 @@ exports.getEmpresaById = async (req, res) => {
   }
 };
 
-exports.updateEmpresa = async (req, res) => {
+const updateEmpresa = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
-    const { nombre, correo, cliente_id, tieneMantenimiento } = req.body;
+    const { nombre, tieneMantenimiento } = req.body;
+    const campos = { nombre, tieneMantenimiento };
 
     const empresaActual = await Empresa.findById(req.params.id);
     if (!empresaActual) {
       return res.status(404).json({ message: "Empresa no encontrada" });
     }
 
-    const updates = {};
-    let isModified = false;
+    const { updates, hasChanges, message } = getUpdatedFields(
+      campos,
+      empresaActual
+    );
 
-    if (nombre && nombre !== empresaActual.nombre) {
-      updates.nombre = nombre;
-      isModified = true;
-    }
-
-    if (correo && correo !== empresaActual.correo) {
-      updates.correo = correo;
-      isModified = true;
-    }
-
-    if (
-      cliente_id &&
-      cliente_id.toString() !== empresaActual.cliente_id.toString()
-    ) {
-      updates.cliente_id = cliente_id;
-      isModified = true;
-    }
-
-    if (
-      typeof tieneMantenimiento !== "undefined" &&
-      tieneMantenimiento !== empresaActual.tieneMantenimiento
-    ) {
-      updates.tieneMantenimiento = tieneMantenimiento;
-      isModified = true;
-    }
-
-    if (!isModified) {
-      return res.status(200).json({
-        message: "La información es la misma, no se realizaron cambios.",
-      });
+    if (!hasChanges) {
+      return res.status(200).json({ message });
     }
 
     const empresa = await Empresa.findByIdAndUpdate(
       req.params.id,
       { $set: updates },
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     );
 
     res.status(200).json({ message: "Empresa actualizada con éxito" });
@@ -133,7 +116,7 @@ exports.updateEmpresa = async (req, res) => {
   }
 };
 
-exports.deleteEmpresa = async (req, res) => {
+const deleteEmpresa = async (req, res) => {
   try {
     const empresa = await Empresa.findByIdAndDelete(req.params.id);
     if (!empresa) {
@@ -145,4 +128,12 @@ exports.deleteEmpresa = async (req, res) => {
       .status(500)
       .json({ message: "Error al eliminar empresa", error: error.message });
   }
+};
+
+module.exports = {
+  createEmpresa,
+  getAllEmpresas,
+  getEmpresaById,
+  updateEmpresa,
+  deleteEmpresa,
 };
