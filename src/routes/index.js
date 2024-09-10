@@ -31,15 +31,15 @@ router.use("/entidades", entidad);
 router.use("/usuarios", usuario);
 router.use("/roles", roles);
 router.use("/contactos", contacto);
-// router.use("/clientes", cliente);
+router.use("/clientes", cliente);
+router.use("/empresas", empresa);
+router.use("/empleados", empleado);
+// router.use("/proyectos", proyecto);
 
-// router.use("/empleados", empleado);
-// router.use("/empresas", empresa);
 // router.use("/horasFacturables", horasFacturables);
 // router.use("/mantenimientos", mantenimiento);
 // router.use("/productos", producto);
 // router.use("/proveedores", proveedor);
-// router.use("/proyectos", proyecto);
 
 // router.use("/solicitudes", solicitud);
 // router.use("/tareasMantenimientos", tareasManteniento);

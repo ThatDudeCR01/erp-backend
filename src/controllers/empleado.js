@@ -1,16 +1,30 @@
 const Empleado = require("../models/empleado");
+const handleValidationErrors = require("../config/validateResult");
+const { getUpdatedFields } = require("../utils/fieldUtils");
 
-exports.createEmpleado = async (req, res) => {
+const createEmpleado = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
-    const { nombre, apellido, telefono, puesto, salario, entidad } = req.body;
+    const {
+      nombre,
+      apellido,
+      correo,
+      telefono,
+      salario,
+      entidad_id,
+      identificacion,
+    } = req.body;
 
     const nuevoEmpleado = new Empleado({
       nombre,
       apellido,
+      correo,
       telefono,
-      puesto,
       salario,
-      entidad,
+      identificacion,
+      entidad_id,
     });
 
     await nuevoEmpleado.save();
@@ -22,7 +36,7 @@ exports.createEmpleado = async (req, res) => {
   }
 };
 
-exports.getAllEmpleados = async (req, res) => {
+const getAllEmpleados = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -42,6 +56,7 @@ exports.getAllEmpleados = async (req, res) => {
     };
 
     const empleados = await Empleado.find(searchCriteria)
+      .select("nombre apellido telefeno correo puesto salario -_id")
       .skip(skip)
       .limit(limit)
       .exec();
@@ -63,13 +78,15 @@ exports.getAllEmpleados = async (req, res) => {
   }
 };
 
-exports.getEmpleadoById = async (req, res) => {
+const getEmpleadoById = async (req, res) => {
   try {
-    const empleado = await Empleado.findById(req.params.id);
+    const empleado = await Empleado.findById(req.params.id).select(
+      "nombre apellido telefono puesto -_id"
+    );
     if (!empleado) {
       return res.status(404).json({ message: "Empleado no encontrado" });
     }
-    res.status(200).json({ message: "Empleado encontrado", empleado });
+    res.status(200).json({ empleado });
   } catch (error) {
     res
       .status(500)
@@ -77,70 +94,33 @@ exports.getEmpleadoById = async (req, res) => {
   }
 };
 
-exports.updateEmpleado = async (req, res) => {
+const updateEmpleado = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
-    const { nombre, apellido, telefono, puesto, salario, entidad } = req.body;
+    const { nombre, apellido, puesto, salario } = req.body;
+    const campos = { nombre, apellido, puesto, salario };
 
     const empleadoActual = await Empleado.findById(req.params.id);
     if (!empleadoActual) {
       return res.status(404).json({ message: "Empleado no encontrado" });
     }
 
-    const updates = {};
-    let isModified = false;
+    const { updates, hasChanges, message } = getUpdatedFields(
+      campos,
+      empleadoActual
+    );
 
-    if (nombre && nombre !== empleadoActual.nombre) {
-      updates.nombre = nombre;
-      isModified = true;
-    }
-
-    if (apellido && apellido !== empleadoActual.apellido) {
-      updates.apellido = apellido;
-      isModified = true;
-    }
-
-    if (telefono && telefono !== empleadoActual.telefono) {
-      updates.telefono = telefono;
-      isModified = true;
-    }
-
-    if (puesto && puesto !== empleadoActual.puesto) {
-      updates.puesto = puesto;
-      isModified = true;
-    }
-
-    if (salario && salario !== empleadoActual.salario) {
-      updates.salario = salario;
-      isModified = true;
-    }
-
-    if (
-      entidad &&
-      empleadoActual.entidad &&
-      entidad.toString() !== empleadoActual.entidad.toString()
-    ) {
-      updates.entidad = entidad;
-      isModified = true;
-    } else if (entidad && !empleadoActual.entidad) {
-      updates.entidad = entidad;
-      isModified = true;
-    }
-
-    if (!isModified) {
-      return res.status(200).json({
-        message: "La información es la misma, no se realizaron cambios.",
-      });
+    if (!hasChanges) {
+      return res.status(200).json({ message });
     }
 
     const empleado = await Empleado.findByIdAndUpdate(
       req.params.id,
       { $set: updates },
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     );
-
     res.status(200).json({ message: "Empleado actualizado con éxito" });
   } catch (error) {
     res
@@ -149,7 +129,7 @@ exports.updateEmpleado = async (req, res) => {
   }
 };
 
-exports.deleteEmpleado = async (req, res) => {
+const deleteEmpleado = async (req, res) => {
   try {
     const empleado = await Empleado.findByIdAndDelete(req.params.id);
     if (!empleado) {
@@ -161,4 +141,12 @@ exports.deleteEmpleado = async (req, res) => {
       .status(500)
       .json({ message: "Error al eliminar empleado", error: error.message });
   }
+};
+
+module.exports = {
+  createEmpleado,
+  getAllEmpleados,
+  getEmpleadoById,
+  updateEmpleado,
+  deleteEmpleado,
 };

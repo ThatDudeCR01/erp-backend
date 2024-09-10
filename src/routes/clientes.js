@@ -7,16 +7,20 @@ const {
   deleteCliente,
 } = require("../controllers/cliente");
 const router = express.Router();
-const clienteValidacion = require("../validators/cliente");
+const {
+  clienteValidacion,
+  actualizarClienteValidacion,
+  validarClienteId,
+} = require("../validators/cliente");
 
 router.get("/", getAllClientes);
 
-router.post("/", createCliente);
+router.post("/", clienteValidacion, createCliente);
 
 router.get("/:id", getClienteById);
 
-router.put("/:id", updateCliente);
+router.patch("/:id", actualizarClienteValidacion, updateCliente);
 
-router.delete("/:id", deleteCliente);
+router.delete("/:id", validarClienteId, deleteCliente);
 
 module.exports = router;

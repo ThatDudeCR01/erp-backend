@@ -1,17 +1,28 @@
 const Proveedor = require("../models/proveedor");
+const Entidad = require("../models/entidad");
+const handleValidationErrors = require("../config/validateResult");
+const { getUpdatedFields } = require("../utils/fieldUtils");
 
-exports.createProveedor = async (req, res) => {
+const createProveedor = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
-    const { nombre, correo, telefono, cedula, empresa, entidad_id } = req.body;
+    const { nombre, correo, telefono, cedula, entidad_id } = req.body;
+
+    const entidadExistente = await Entidad.findById(ObjectIdentidad_id);
+    if (!entidadExistente) {
+      return res.status(404).json({
+        message: "La entidad proporcionada no se encontró en la base de datos",
+      });
+    }
 
     const nuevoProveedor = new Proveedor({
       nombre,
       correo,
       telefono,
       cedula,
-      empresa,
       entidad_id,
-      // empresa y entidad_id se asignarían aquí como antes
     });
 
     await nuevoProveedor.save();
@@ -23,7 +34,7 @@ exports.createProveedor = async (req, res) => {
   }
 };
 
-exports.getAllProveedores = async (req, res) => {
+const getAllProveedores = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -34,12 +45,14 @@ exports.getAllProveedores = async (req, res) => {
 
     const searchCriteria = {
       $or: [
-        { empresa: { $regex: filterRegex } },
-        { entidad_id: { $regex: filterRegex } },
+        { nombre: { $regex: filterRegex } },
+        { correo: { $regex: filterRegex } },
+        { telefono: { $regex: filterRegex } },
       ],
     };
 
     const proveedores = await Proveedor.find(searchCriteria)
+      .select("nombre correo telefono -_id")
       .skip(skip)
       .limit(limit)
       .exec();
@@ -63,13 +76,15 @@ exports.getAllProveedores = async (req, res) => {
   }
 };
 
-exports.getProveedorById = async (req, res) => {
+const getProveedorById = async (req, res) => {
   try {
-    const proveedor = await Proveedor.findById(req.params.id);
+    const proveedor = await Proveedor.findById(req.params.id).select(
+      "nombre correo telefono -_id"
+    );
     if (!proveedor) {
       return res.status(404).json({ message: "Proveedor no encontrado" });
     }
-    res.status(200).json({ message: "Proveedor encontrado" });
+    res.status(200).json({ proveedor });
   } catch (error) {
     res
       .status(500)
@@ -77,46 +92,33 @@ exports.getProveedorById = async (req, res) => {
   }
 };
 
-exports.updateProveedor = async (req, res) => {
+const updateProveedor = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
-    const { empresa, entidad_id } = req.body;
+    const { nombre, telefono } = req.body;
+    const campos = { nombre, telefono };
 
     const proveedorActual = await Proveedor.findById(req.params.id);
     if (!proveedorActual) {
       return res.status(404).json({ message: "Proveedor no encontrado" });
     }
 
-    const updates = {};
-    let isModified = false;
+    const { updates, hasChanges, message } = getUpdatedFields(
+      campos,
+      proveedorActual
+    );
 
-    if (empresa && empresa !== proveedorActual.empresa) {
-      updates.empresa = empresa;
-      isModified = true;
-    }
-
-    if (
-      entidad_id &&
-      entidad_id.toString() !== proveedorActual.entidad_id.toString()
-    ) {
-      updates.entidad_id = entidad_id;
-      isModified = true;
-    }
-
-    if (!isModified) {
-      return res.status(200).json({
-        message: "La información es la misma, no se realizaron cambios.",
-      });
+    if (!hasChanges) {
+      return res.status(200).json({ message });
     }
 
     const proveedor = await Proveedor.findByIdAndUpdate(
       req.params.id,
       { $set: updates },
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     );
-
     res.status(200).json({ message: "Proveedor actualizado con éxito" });
   } catch (error) {
     res
@@ -125,7 +127,7 @@ exports.updateProveedor = async (req, res) => {
   }
 };
 
-exports.deleteProveedor = async (req, res) => {
+const deleteProveedor = async (req, res) => {
   try {
     const proveedor = await Proveedor.findByIdAndDelete(req.params.id);
     if (!proveedor) {
@@ -137,4 +139,12 @@ exports.deleteProveedor = async (req, res) => {
       .status(500)
       .json({ message: "Error al eliminar proveedor", error: error.message });
   }
+};
+
+module.exports = {
+  createProveedor,
+  getAllProveedores,
+  getProveedorById,
+  updateProveedor,
+  deleteProveedor,
 };

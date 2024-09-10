@@ -1,13 +1,29 @@
 const Producto = require("../models/producto");
+const Proveedor = require("../models/proveedor");
+const handleValidationErrors = require("../config/validateResult");
+const { getUpdatedFields } = require("../utils/fieldUtils");
 
-exports.createProducto = async (req, res) => {
+const createProducto = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
-    const { nombre, precio, tipo } = req.body;
+    const { nombre, precio, tipoProducto_id, proveedor_id } = req.body;
+
+    const proveedorExistente = await Proveedor.findById(proveedor_id);
+
+    if (!proveedorExistente) {
+      return res.status(404).json({
+        message:
+          "El proveedor proporcionada no se encontró en la base de datos",
+      });
+    }
 
     const nuevoProducto = new Producto({
       nombre,
       precio,
-      tipo,
+      tipoProducto_id,
+      proveedor_id,
     });
 
     await nuevoProducto.save();
@@ -19,7 +35,7 @@ exports.createProducto = async (req, res) => {
   }
 };
 
-exports.getAllProductos = async (req, res) => {
+const getAllProductos = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -31,11 +47,12 @@ exports.getAllProductos = async (req, res) => {
     const searchCriteria = {
       $or: [
         { nombre: { $regex: filterRegex } },
-        { precio: { $regex: filterRegex } },
+        ...(isNaN(filter) ? [] : [{ precio: Number(filter) }]),
       ],
     };
 
     const productos = await Producto.find(searchCriteria)
+      .select("nombre precio tipo -_id")
       .skip(skip)
       .limit(limit)
       .exec();
@@ -57,13 +74,16 @@ exports.getAllProductos = async (req, res) => {
   }
 };
 
-exports.getProductoById = async (req, res) => {
+const getProductoById = async (req, res) => {
   try {
-    const producto = await Producto.findById(req.params.id);
+    const producto = await Producto.findById(req.params.id)
+      .select("  nombre precio tipo proveedor_id -_id ")
+      .populate("proveedor_id")
+      .populate("tipoProducto_id");
     if (!producto) {
       return res.status(404).json({ message: "Producto no encontrado" });
     }
-    res.status(200).json({ message: "Producto encontrado" });
+    res.status(200).json({ producto });
   } catch (error) {
     res
       .status(500)
@@ -71,46 +91,32 @@ exports.getProductoById = async (req, res) => {
   }
 };
 
-exports.updateProducto = async (req, res) => {
+const updateProducto = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
     const { nombre, precio, tipo } = req.body;
+    const campos = { nombre, precio, tipo };
 
     const productoActual = await Producto.findById(req.params.id);
     if (!productoActual) {
       return res.status(404).json({ message: "Producto no encontrado" });
     }
 
-    const updates = {};
-    let isModified = false;
+    const { updates, hasChanges, message } = getUpdatedFields(
+      campos,
+      productoActual
+    );
 
-    if (nombre && nombre !== productoActual.nombre) {
-      updates.nombre = nombre;
-      isModified = true;
-    }
-
-    if (precio && precio !== productoActual.precio) {
-      updates.precio = precio;
-      isModified = true;
-    }
-
-    if (tipo && tipo.toString() !== productoActual.tipo.toString()) {
-      updates.tipo = tipo;
-      isModified = true;
-    }
-
-    if (!isModified) {
-      return res.status(200).json({
-        message: "La información es la misma, no se realizaron cambios.",
-      });
+    if (!hasChanges) {
+      return res.status(200).json({ message });
     }
 
     const producto = await Producto.findByIdAndUpdate(
       req.params.id,
       { $set: updates },
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     );
 
     res.status(200).json({ message: "Producto actualizado con éxito" });
@@ -121,7 +127,7 @@ exports.updateProducto = async (req, res) => {
   }
 };
 
-exports.deleteProducto = async (req, res) => {
+const deleteProducto = async (req, res) => {
   try {
     const producto = await Producto.findByIdAndDelete(req.params.id);
     if (!producto) {
@@ -133,4 +139,12 @@ exports.deleteProducto = async (req, res) => {
       .status(500)
       .json({ message: "Error al eliminar producto", error: error.message });
   }
+};
+
+module.exports = {
+  createProducto,
+  getAllProductos,
+  getProductoById,
+  updateProducto,
+  deleteProducto,
 };

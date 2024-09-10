@@ -1,32 +1,28 @@
 const express = require("express");
-const proyecto = require("../controllers/proyecto");
+const {
+  createProyecto,
+  getAllProyectos,
+  getProyectoById,
+  updateProyecto,
+  deleteProyecto,
+} = require("../controllers/proyecto");
+
 const router = express.Router();
 const { validationResult } = require("express-validator");
-const proyectoValidacion = require("../validators/proyecto");
+const {
+  proyectoValidacion,
+  actualizarProductoValidacion,
+  validarProyectoId,
+} = require("../validators/proyecto");
 
-router.get("/", proyecto.getAllProyectos);
+router.post("/", proyectoValidacion, createProyecto);
 
-// Ruta para crear un nuevo proyecto, aplicando las validaciones
-router.post("/", proyectoValidacion, (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  proyecto.createProyecto(req, res, next);
-});
+router.get("/", getAllProyectos);
 
-router.get("/:id", proyecto.getProyectoById);
+router.get("/:id", getProyectoById);
 
-// Actualizar proyecto
-router.put("/:id", proyectoValidacion, (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  proyecto.updateProyecto(req, res, next);
-});
+router.patch("/:id", actualizarProductoValidacion, updateProyecto);
 
-// Eliminar proyecto
-router.delete("/:id", proyecto.deleteProyecto);
+router.delete("/:id", validarProyectoId, deleteProyecto);
 
 module.exports = router;

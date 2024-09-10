@@ -1,6 +1,11 @@
 const Proyecto = require("../models/proyecto");
+const handleValidationErrors = require("../config/validateResult");
+const { getUpdatedFields } = require("../utils/fieldUtils");
 
-exports.createProyecto = async (req, res) => {
+const createProyecto = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
     const { nombre, duracion, descripcion, empresa_id } = req.body;
 
@@ -20,7 +25,7 @@ exports.createProyecto = async (req, res) => {
   }
 };
 
-exports.getAllProyectos = async (req, res) => {
+const getAllProyectos = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -37,6 +42,7 @@ exports.getAllProyectos = async (req, res) => {
     };
 
     const proyectos = await Proyecto.find(searchCriteria)
+      .select("nombre duracion descripcion -_id")
       .skip(skip)
       .limit(limit)
       .exec();
@@ -58,13 +64,15 @@ exports.getAllProyectos = async (req, res) => {
   }
 };
 
-exports.getProyectoById = async (req, res) => {
+const getProyectoById = async (req, res) => {
   try {
-    const proyecto = await Proyecto.findById(req.params.id);
+    const proyecto = await Proyecto.findById(req.params.id).select(
+      "nombre duracion descripcion -_id"
+    );
     if (!proyecto) {
       return res.status(404).json({ message: "Proyecto no encontrado" });
     }
-    res.status(200).json({ message: "Proyecto encontrado" });
+    res.status(200).json({ proyecto });
   } catch (error) {
     res
       .status(500)
@@ -72,7 +80,10 @@ exports.getProyectoById = async (req, res) => {
   }
 };
 
-exports.updateProyecto = async (req, res) => {
+const updateProyecto = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
     const { nombre, duracion, descripcion, empresa_id } = req.body;
 
@@ -130,7 +141,7 @@ exports.updateProyecto = async (req, res) => {
   }
 };
 
-exports.deleteProyecto = async (req, res) => {
+const deleteProyecto = async (req, res) => {
   try {
     const proyecto = await Proyecto.findByIdAndDelete(req.params.id);
     if (!proyecto) {
@@ -142,4 +153,12 @@ exports.deleteProyecto = async (req, res) => {
       .status(500)
       .json({ message: "Error al eliminar proyecto", error: error.message });
   }
+};
+
+module.exports = {
+  createProyecto,
+  getAllProyectos,
+  getProyectoById,
+  updateProyecto,
+  deleteProyecto,
 };

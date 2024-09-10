@@ -1,14 +1,18 @@
 const TipoProducto = require("../models/tipo-producto");
+const handleValidationErrors = require("../config/validateResult");
+const { getUpdatedFields } = require("../utils/fieldUtils");
 
-exports.createTipoProducto = async (req, res) => {
+const createTipoProducto = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
-    const { nombre, unidad, descripcion, producto } = req.body;
+    const { nombre, unidad, descripcion } = req.body;
 
     const nuevoTipoProducto = new TipoProducto({
       nombre,
       unidad,
       descripcion,
-      producto,
     });
 
     await nuevoTipoProducto.save();
@@ -21,7 +25,7 @@ exports.createTipoProducto = async (req, res) => {
   }
 };
 
-exports.getAllTiposProducto = async (req, res) => {
+const getAllTiposProducto = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -39,6 +43,7 @@ exports.getAllTiposProducto = async (req, res) => {
     };
 
     const tiposProducto = await TipoProducto.find(searchCriteria)
+      .select("nombre unidad descripcion -_id")
       .skip(skip)
       .limit(limit)
       .exec();
@@ -62,19 +67,17 @@ exports.getAllTiposProducto = async (req, res) => {
   }
 };
 
-exports.getTipoProductoById = async (req, res) => {
+const getTipoProductoById = async (req, res) => {
   try {
-    const tipoProducto = await TipoProducto.findById(req.params.id).populate(
-      "producto"
+    const tipoProducto = await TipoProducto.findById(req.params.id).select(
+      " nombre unidad descripcion -_id"
     );
     if (!tipoProducto) {
       return res
         .status(404)
         .json({ message: "Tipo de producto no encontrado" });
     }
-    res
-      .status(200)
-      .json({ message: "Tipo de producto encontrado", tipoProducto });
+    res.status(200).json({ tipoProducto });
   } catch (error) {
     res.status(500).json({
       message: "Error al buscar tipo de producto",
@@ -83,61 +86,36 @@ exports.getTipoProductoById = async (req, res) => {
   }
 };
 
-exports.updateTipoProducto = async (req, res) => {
+const updateTipoProducto = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
-    const { nombre, unidad, descripcion, producto } = req.body;
+    const { nombre, unidad, descripcion } = req.body;
+    const campos = { nombre, unidad, descripcion };
 
     const tipoProductoActual = await TipoProducto.findById(req.params.id);
     if (!tipoProductoActual) {
-      return res
-        .status(404)
-        .json({ message: "Tipo de producto no encontrado" });
+      return res.status(404).json({ message: "Tipo producto no encontrado" });
     }
 
-    const updates = {};
-    let isModified = false;
+    const { updates, hasChanges, message } = getUpdatedFields(
+      campos,
+      tipoProductoActual
+    );
 
-    if (nombre && nombre !== tipoProductoActual.nombre) {
-      updates.nombre = nombre;
-      isModified = true;
+    if (!hasChanges) {
+      return res.status(200).json({ message });
     }
 
-    if (unidad && unidad !== tipoProductoActual.unidad) {
-      updates.unidad = unidad;
-      isModified = true;
-    }
-
-    if (descripcion && descripcion !== tipoProductoActual.descripcion) {
-      updates.descripcion = descripcion;
-      isModified = true;
-    }
-
-    if (
-      producto &&
-      producto.toString() !== tipoProductoActual.producto.toString()
-    ) {
-      updates.producto = producto;
-      isModified = true;
-    }
-
-    if (!isModified) {
-      return res.status(200).json({
-        message: "La información es la misma, no se realizaron cambios.",
-      });
-    }
-
-    const tipoProducto = await TipoProducto.findByIdAndUpdate(
+    const producto = await TipoProducto.findByIdAndUpdate(
       req.params.id,
       { $set: updates },
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     );
 
     res.status(200).json({
       message: "Tipo de producto actualizado con éxito",
-      tipoProducto,
     });
   } catch (error) {
     res.status(400).json({
@@ -147,7 +125,7 @@ exports.updateTipoProducto = async (req, res) => {
   }
 };
 
-exports.deleteTipoProducto = async (req, res) => {
+const deleteTipoProducto = async (req, res) => {
   try {
     const tipoProducto = await TipoProducto.findByIdAndDelete(req.params.id);
     if (!tipoProducto) {
@@ -162,4 +140,12 @@ exports.deleteTipoProducto = async (req, res) => {
       error: error.message,
     });
   }
+};
+
+module.exports = {
+  createTipoProducto,
+  getAllTiposProducto,
+  getTipoProductoById,
+  updateTipoProducto,
+  deleteTipoProducto,
 };

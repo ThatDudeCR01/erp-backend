@@ -2,9 +2,10 @@ const mongoose = require("mongoose");
 
 const clienteSchema = new mongoose.Schema({
   nombre: { type: String, required: true },
+  apellido: { type: String },
   correo: { type: String, required: true, unique: true },
   telefono: { type: String, required: false },
-  identificacion: { type: String, required: true },
+  cedula: { type: String, required: true, unique: true },
   entidad_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Entidad",
