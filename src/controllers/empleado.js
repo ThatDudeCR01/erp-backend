@@ -10,22 +10,20 @@ const createEmpleado = async (req, res) => {
     const {
       nombre,
       apellido,
-      telefono,
       correo,
-      cedula,
-      puesto,
+      telefono,
       salario,
       entidad_id,
+      identificacion,
     } = req.body;
 
     const nuevoEmpleado = new Empleado({
       nombre,
       apellido,
-      telefono,
       correo,
-      cedula,
-      puesto,
+      telefono,
       salario,
+      identificacion,
       entidad_id,
     });
 

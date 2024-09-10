@@ -7,13 +7,12 @@ const createEmpresa = async (req, res) => {
     return;
   }
   try {
-    const { nombre, correo, cliente_id, tieneMantenimiento } = req.body;
+    const { nombre, correo, cliente_id } = req.body;
 
     const nuevaEmpresa = new Empresa({
       nombre,
       correo,
       cliente_id,
-      tieneMantenimiento,
     });
 
     await nuevaEmpresa.save();
@@ -72,7 +71,7 @@ const getEmpresaById = async (req, res) => {
     if (!empresa) {
       return res.status(404).json({ message: "Empresa no encontrada" });
     }
-    res.status(200).json({ empresa });
+    res.status(200).json(empresa);
   } catch (error) {
     res
       .status(500)

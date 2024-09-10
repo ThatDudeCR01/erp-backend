@@ -31,17 +31,19 @@ router.use("/entidades", entidad);
 router.use("/usuarios", usuario);
 router.use("/roles", roles);
 router.use("/contactos", contacto);
-router.use("/empleados", empleado); //nuevo
-router.use("/proveedores", proveedor); //nuevo
-router.use("/clientes", cliente); //nuevo?
-router.use("/productos", producto); //nuevo
-router.use("/tipoProductos", tipoProducto); //nuevo
-router.use("/empresas", empresa); // en proceso
-router.use("/proyectos", proyecto); // en proceso con empresa
-// router.use("/horasFacturables", horasFacturables); 2
-// router.use("/mantenimientos", mantenimiento); 3
-// router.use("/solicitudes", solicitud); 4
-// router.use("/tareasMantenimientos", tareasManteniento); 5
-// router.use("/templates", template); 6
+router.use("/clientes", cliente);
+router.use("/empresas", empresa);
+router.use("/empleados", empleado);
+// router.use("/proyectos", proyecto);
+
+// router.use("/horasFacturables", horasFacturables);
+// router.use("/mantenimientos", mantenimiento);
+// router.use("/productos", producto);
+// router.use("/proveedores", proveedor);
+
+// router.use("/solicitudes", solicitud);
+// router.use("/tareasMantenimientos", tareasManteniento);
+// router.use("/templates", template);
+// router.use("/tipoProductos", tipoProducto);
 
 module.exports = router;

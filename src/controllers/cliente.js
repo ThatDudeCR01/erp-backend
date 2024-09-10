@@ -7,10 +7,21 @@ const createCliente = async (req, res) => {
   }
 
   try {
-    const { nombre, apellido, correo, telefono, cedula, entidad_id } = req.body;
-    const checkUser = await Cliente.findOne({ correo });
-    if (checkUser) {
+    const { nombre, correo, telefono, identificacion, entidad_id } = req.body;
+
+    const [checkUserByCorreo, checkUserByIdentificacion] = await Promise.all([
+      Cliente.findOne({ correo }),
+      Cliente.findOne({ identificacion }),
+    ]);
+
+    if (checkUserByCorreo) {
       return res.status(400).json({ message: "El correo ya está en uso" });
+    }
+
+    if (checkUserByIdentificacion) {
+      return res
+        .status(400)
+        .json({ message: "La identificación ya está en uso" });
     }
 
     const nuevoCliente = new Cliente({
@@ -18,7 +29,7 @@ const createCliente = async (req, res) => {
       apellido,
       correo,
       telefono,
-      cedula,
+      identificacion,
       entidad_id,
     });
 

@@ -1,25 +1,23 @@
 const express = require("express");
 const {
-  createEmpleado,
   getAllEmpleados,
+  createEmpleado,
   getEmpleadoById,
   updateEmpleado,
   deleteEmpleado,
 } = require("../controllers/empleado");
-
 const router = express.Router();
-const {
-  empleadoValidacion,
-  actualizarEmpleadoValidacion,
-} = require("../validators/empleado");
+
+const empleadoValidacion = require("../validators/empleado");
 
 router.get("/", getAllEmpleados);
-
-router.get("/:id", getEmpleadoById);
+router.get("/", getAllEmpleados);
 
 router.post("/", empleadoValidacion, createEmpleado);
 
-router.patch("/:id", actualizarEmpleadoValidacion, updateEmpleado);
+router.get("/:id", getEmpleadoById);
+
+router.put("/:id", empleadoValidacion, updateEmpleado);
 
 router.delete("/:id", deleteEmpleado);
 

@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 
 const empresaSchema = new mongoose.Schema({
   nombre: { type: String, required: true },
-  correo: { type: String, required: true, unique: true },
-  tieneMantenimiento: { type: Boolean, required: true },
+  correo: { type: String, required: true, match: /.+\@.+\..+/ },
+  tieneMantenimiento: { type: Boolean },
   cliente_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Cliente",
@@ -12,6 +12,5 @@ const empresaSchema = new mongoose.Schema({
 });
 
 const Empresa = mongoose.model("Empresa", empresaSchema);
-module.exports = Empresa;
 
-//revisar la relacion entre empresa y cliente
+module.exports = Empresa;
