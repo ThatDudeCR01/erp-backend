@@ -8,16 +8,18 @@ const {
 } = require("../controllers/empleado");
 const router = express.Router();
 
-const empleadoValidacion = require("../validators/empleado");
-
-router.get("/", getAllEmpleados);
-router.get("/", getAllEmpleados);
+const {
+  empleadoValidacion,
+  actualizarEmpleadoValidacion,
+} = require("../validators/empleado");
 
 router.post("/", empleadoValidacion, createEmpleado);
 
+router.get("/", getAllEmpleados);
+
 router.get("/:id", getEmpleadoById);
 
-router.put("/:id", empleadoValidacion, updateEmpleado);
+router.patch("/:id", actualizarEmpleadoValidacion, updateEmpleado);
 
 router.delete("/:id", deleteEmpleado);
 

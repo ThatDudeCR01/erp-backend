@@ -20,30 +20,24 @@ const mantenimiento = require("./mantenimientos");
 const template = require("./templates");
 const tipoProducto = require("./tipoProductos");
 
-// //rutas publicas
 // router.use("/login", login);
-
 // router.use(verifyToken);
-
-//rutas privadas
 
 router.use("/entidades", entidad);
 router.use("/usuarios", usuario);
 router.use("/roles", roles);
 router.use("/contactos", contacto);
-router.use("/clientes", cliente);
-router.use("/empresas", empresa);
 router.use("/empleados", empleado);
-// router.use("/proyectos", proyecto);
-
+router.use("/proveedores", proveedor);
+router.use("/clientes", cliente);
+router.use("/productos", producto);
+router.use("/tipoProductos", tipoProducto);
+router.use("/empresas", empresa);
+router.use("/proyectos", proyecto);
 // router.use("/horasFacturables", horasFacturables);
 // router.use("/mantenimientos", mantenimiento);
-// router.use("/productos", producto);
-// router.use("/proveedores", proveedor);
-
 // router.use("/solicitudes", solicitud);
 // router.use("/tareasMantenimientos", tareasManteniento);
 // router.use("/templates", template);
-// router.use("/tipoProductos", tipoProducto);
 
 module.exports = router;

@@ -60,6 +60,9 @@ const validarProveedorId = body("proveedor_id")
     return true;
   });
 
+module.exports = {
+  validarProveedorId,
+};
 // Agrupación de validaciones para la creación de un producto
 const productoValidacion = [
   validarNombre,
