@@ -31,4 +31,10 @@ const usuarioValidacion = [
     ),
 ];
 
-module.exports = usuarioValidacion;
+const roleIdValidacion = [
+  body("role_id")
+    .isMongoId()
+    .withMessage("Invalid role ID. Must be a valid MongoDB ObjectId."),
+];
+
+module.exports = { usuarioValidacion, roleIdValidacion };
