@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { verifyToken } = require("../middleware/auth");
 
 const login = require("./login");
 
@@ -20,8 +21,8 @@ const mantenimiento = require("./mantenimientos");
 const template = require("./templates");
 const tipoProducto = require("./tipoProductos");
 
-// router.use("/login", login);
-// router.use(verifyToken);
+router.use("/login", login);
+router.use(verifyToken);
 
 router.use("/entidades", entidad);
 router.use("/usuarios", usuario);
