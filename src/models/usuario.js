@@ -6,6 +6,8 @@ const usuarioSchema = new mongoose.Schema({
   correo: { type: String, unique: true, required: true },
   contraseña: { type: String, required: true },
   cedula: { type: String, unique: true, required: true },
+  reiniciar_contraseña_token: { type: String },
+  reiniciar_contraseña_token_expira: { type: Date },
   entidad_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Entidad",
