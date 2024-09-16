@@ -25,16 +25,27 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-const checkPermisos = (allowedRoles) => {
+const checkPermisos = (permisoParam) => {
   return (req, res, next) => {
-    const hasRole = req.user.roles.some((role) => allowedRoles.includes(role));
+    const permisos = req.user.permisos;
 
-    if (!hasRole) {
-      return res.status(403).send({
-        message: "Access Denied. You do not have the necessary roles.",
+    const [tabla, action] = permisoParam.split("/");
+
+    const permiso = permisos.find((p) => p.tabla === tabla);
+
+    if (!permiso) {
+      return res.status(403).json({
+        message: `Access denied. No permissions found for ${tabla}.`,
       });
     }
-    next();
+
+    if (permiso[action] === true) {
+      next();
+    } else {
+      return res.status(403).json({
+        message: `Access denied. You do not have ${action} permission for ${tabla}.`,
+      });
+    }
   };
 };
 

@@ -8,8 +8,16 @@ exports.createUsuario = async (req, res) => {
   }
 
   try {
-    const { nombre, apellido, correo, contraseña, cedula, entidad_id } =
-      req.body;
+    const {
+      nombre,
+      apellido,
+      correo,
+      contraseña,
+      cedula,
+      entidad_id,
+      default_role,
+      roles,
+    } = req.body;
 
     const checkUser = await Usuario.findOne({ correo });
     if (checkUser) {
@@ -26,6 +34,8 @@ exports.createUsuario = async (req, res) => {
       contraseña: hashedPassword,
       cedula,
       entidad_id,
+      default_role,
+      roles,
     });
 
     await nuevoUsuario.save();

@@ -3,7 +3,8 @@ const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const sgMail = require("@sendgrid/mail");
 const Usuario = require("../models/usuario");
-sgMail.setApiKey(process.env.NODE_SENDGRID_API_KEY);
+const Rol = require("../models/roles");
+// sgMail.setApiKey(process.env.NODE_SENDGRID_API_KEY);
 
 const login = async (req, res) => {
   const { correo, contraseña } = req.body;
@@ -15,6 +16,8 @@ const login = async (req, res) => {
         .status(400)
         .json({ message: "Usuario o contraseña incorrectos." });
     }
+    
+    const rolePermisos = await Rol.findById(usuario.active_role);
 
     const isMatch = await bcrypt.compare(contraseña, usuario.contraseña);
     if (!isMatch) {
@@ -24,8 +27,12 @@ const login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: usuario._id, nombre: usuario.nombre },
-      process.env.JWT_SECRET,
+      {
+        id: usuario._id,
+        nombre: usuario.nombre,
+        permisos: rolePermisos.permisos,
+      },
+      process.env.NODE_JWT_SECRET,
       { expiresIn: "1h" }
     );
 
