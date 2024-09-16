@@ -1,8 +1,9 @@
 const Usuario = require("../models/usuario");
+const Rol = require("../models/roles");
 const bcrypt = require("bcryptjs");
 const handleValidationErrors = require("../config/validateResult");
 
-exports.createUsuario = async (req, res) => {
+const createUsuario = async (req, res) => {
   if (handleValidationErrors(req, res)) {
     return;
   }
@@ -47,17 +48,15 @@ exports.createUsuario = async (req, res) => {
   }
 };
 
-exports.getAllUsuarios = async (req, res) => {
+const getAllUsuarios = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
     const filter = req.query.filter || "";
 
-    // Crear una expresión regular para la búsqueda insensible a mayúsculas/minúsculas
     const filterRegex = new RegExp(filter, "i");
 
-    // Definir los criterios de búsqueda
     const searchCriteria = {
       $or: [
         { nombre: { $regex: filterRegex } },
@@ -67,17 +66,14 @@ exports.getAllUsuarios = async (req, res) => {
       ],
     };
 
-    // Obtener usuarios con los criterios de búsqueda, paginación y límites
     const usuarios = await Usuario.find(searchCriteria)
       .select("id nombre correo")
       .skip(skip)
       .limit(limit)
       .exec();
 
-    // Obtener el total de documentos que cumplen con los criterios de búsqueda
     const totalUsuarios = await Usuario.countDocuments(searchCriteria).exec();
 
-    // Enviar la respuesta con los resultados
     res.send({
       page,
       limit,
@@ -93,7 +89,7 @@ exports.getAllUsuarios = async (req, res) => {
   }
 };
 
-exports.getUsuarioById = async (req, res) => {
+const getUsuarioById = async (req, res) => {
   try {
     const usuario = await Usuario.findById(req.params.id).select("-contraseña");
     if (!usuario) {
@@ -107,70 +103,17 @@ exports.getUsuarioById = async (req, res) => {
   }
 };
 
-exports.updateUsuario = async (req, res) => {
+const updateUsuario = async (req, res) => {
   try {
-    const { nombre, apellido, telefono, contraseña, entidad } = req.body;
-
-    const usuarioActual = await Usuario.findById(req.param3s.id);
+    const usuarioActual = await Usuario.findById(req.params.id);
     if (!usuarioActual) {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
-    const updates = {};
-    let isModified = false;
-
-    if (nombre && nombre !== usuarioActual.nombre) {
-      updates.nombre = nombre;
-      isModified = true;
-    }
-
-    if (apellido && apellido !== usuarioActual.apellido) {
-      updates.apellido = apellido;
-      isModified = true;
-    }
-
-    if (telefono && telefono !== usuarioActual.telefono) {
-      updates.telefono = telefono;
-      isModified = true;
-    }
-
-    if (
-      entidad &&
-      usuarioActual.entidad &&
-      entidad.toString() !== usuarioActual.entidad.toString()
-    ) {
-      updates.entidad = entidad;
-      isModified = true;
-    } else if (entidad && !usuarioActual.entidad) {
-      updates.entidad = entidad;
-      isModified = true;
-    }
-
-    if (
-      contraseña &&
-      !(await bcrypt.compare(contraseña, usuarioActual.contraseña))
-    ) {
-      const salt = await bcrypt.genSalt(10);
-      updates.contraseña = await bcrypt.hash(contraseña, salt);
-      isModified = true;
-    }
-
-    // Verificar si hubo algún cambio
-    if (!isModified) {
-      return res.status(200).json({
-        message: "La información es la misma, no se realizaron cambios.",
-      });
-    }
-
-    // Actualizar el usuario si hubo cambios
-    const usuario = await Usuario.findByIdAndUpdate(
-      req.params.id,
-      { $set: updates },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+    await Usuario.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
     res.status(200).json({ message: "Usuario actualizado con éxito" });
   } catch (error) {
@@ -180,7 +123,7 @@ exports.updateUsuario = async (req, res) => {
   }
 };
 
-exports.deleteUsuario = async (req, res) => {
+const deleteUsuario = async (req, res) => {
   try {
     const usuario = await Usuario.findByIdAndDelete(req.params.id);
     if (!usuario) {
@@ -192,4 +135,143 @@ exports.deleteUsuario = async (req, res) => {
       .status(500)
       .json({ message: "Error al eliminar usuario", error: error.message });
   }
+};
+
+const changeActive = async (req, res) => {
+  try {
+    const usuario = await Usuario.findById(req.params.id);
+    if (!usuario) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    const active = !usuario.activo;
+    await Usuario.findByIdAndUpdate(req.params.id, { activo: active });
+
+    res.status(200).json({ message: "Estado de usuario actualizado" });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al actualizar estado de usuario",
+      error: error.message,
+    });
+  }
+};
+
+const changeRoleActivo = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
+  const { id } = req.params;
+  const { role_id } = req.body;
+
+  try {
+    const roleExists = await Rol.findById(role_id);
+
+    if (!roleExists) {
+      return res.status(404).json({ message: "Role not found" });
+    }
+
+    const usuario = await Usuario.findById(id);
+
+    if (!usuario) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!usuario.roles.includes(role_id)) {
+      return res.status(400).json({
+        message: "The specified role is not associated with this user.",
+      });
+    }
+
+    usuario.active_role = role_id;
+    await usuario.save();
+
+    res.status(200).json({
+      message: "Active role updated successfully",
+      active_role: usuario.active_role,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+const addRole = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id } = req.params;
+  const { role_id } = req.body;
+
+  try {
+    const roleExists = await Roles.findById(role_id);
+    if (!roleExists) {
+      return res.status(404).json({ message: "Role not found" });
+    }
+
+    const usuario = await Usuario.findById(id);
+    if (!usuario) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (usuario.roles.includes(role_id)) {
+      return res
+        .status(400)
+        .json({ message: "Role already assigned to the user" });
+    }
+
+    usuario.roles.push(role_id);
+    await usuario.save();
+
+    res.status(200).json({
+      message: "Role added successfully",
+      roles: usuario.roles,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+const removeRole = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id } = req.params;
+  const { role_id } = req.body;
+
+  try {
+    const usuario = await Usuario.findById(id);
+    if (!usuario) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!usuario.roles.includes(role_id)) {
+      return res.status(400).json({ message: "Role not assigned to the user" });
+    }
+
+    usuario.roles = usuario.roles.filter((role) => role.toString() !== role_id);
+    await usuario.save();
+
+    res.status(200).json({
+      message: "Role removed successfully",
+      roles: usuario.roles,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+module.exports = {
+  createUsuario,
+  getAllUsuarios,
+  getUsuarioById,
+  updateUsuario,
+  deleteUsuario,
+  changeActive,
+  changeRoleActivo,
+  changeRoleActivo,
+  addRole,
+  removeRole,
 };
