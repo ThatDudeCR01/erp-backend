@@ -8,5 +8,5 @@ const mantenimientoSchema = new mongoose.Schema({
   },
 });
 
-const Mantenimiento = mongoose.model("Mantenimiento", mantenimientoSchema);
+const Mantenimiento = mongoose.model("Mantenimientos", mantenimientoSchema);
 module.exports = Mantenimiento;
