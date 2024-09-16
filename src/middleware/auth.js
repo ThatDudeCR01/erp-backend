@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-exports.verifyToken = (req, res, next) => {
+const verifyToken = (req, res, next) => {
   if (!req.header("Authorization")) {
     return res
       .status(401)
@@ -8,6 +8,7 @@ exports.verifyToken = (req, res, next) => {
   }
 
   const token = req.header("Authorization").replace("Bearer ", "");
+
   if (!token || token === "") {
     return res
       .status(401)
@@ -19,11 +20,12 @@ exports.verifyToken = (req, res, next) => {
     req.user = verified;
     next();
   } catch (error) {
+    console.log(error);
     res.status(400).send({ message: "Invalid Token" });
   }
 };
 
-exports.checkRoles = (allowedRoles) => {
+const checkRoles = (allowedRoles) => {
   return (req, res, next) => {
     const hasRole = req.user.roles.some((role) => allowedRoles.includes(role));
 
@@ -35,3 +37,5 @@ exports.checkRoles = (allowedRoles) => {
     next();
   };
 };
+
+module.exports = { verifyToken, checkRoles };

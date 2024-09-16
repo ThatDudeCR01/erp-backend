@@ -2,8 +2,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const Usuario = require("../models/usuario");
 
-// Autenticación de usuario y generación de token
-exports.login = async (req, res) => {
+const login = async (req, res) => {
   const { correo, contraseña } = req.body;
 
   try {
@@ -23,14 +22,16 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign(
       { id: usuario._id, nombre: usuario.nombre },
-      process.env.JWT_SECRET,
+      process.env.NODE_JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    res.status(200).json({ message: "Autenticación exitosa", token });
+    res.status(200).json({ token: token });
   } catch (error) {
     res
       .status(500)
       .json({ message: "Error en la autenticación", error: error.message });
   }
 };
+
+module.exports = { login };
