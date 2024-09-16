@@ -7,17 +7,23 @@ const {
   getAllUsuarios,
 } = require("../controllers/usuario");
 const router = express.Router();
+const { checkPermisos } = require("../middleware/auth");
 
 const usuarioValidacion = require("../validators/usuario");
 
-router.get("/", getAllUsuarios);
+router.get("/", checkPermisos("Usuarios/read"), getAllUsuarios);
 
-router.post("/", usuarioValidacion, createUsuario);
+router.post(
+  "/",
+  usuarioValidacion,
+  checkPermisos("Usuarios/create"),
+  createUsuario
+);
 
-router.get("/:id", getUsuarioById);
+router.get("/:id", checkPermisos("Usuarios/read"), getUsuarioById);
 
-router.put("/:id", updateUsuario);
+router.put("/:id", checkPermisos("Usuarios/update"), updateUsuario);
 
-router.delete("/:id", deleteUsuario);
+router.delete("/:id", checkPermisos("Usuarios/delete"), deleteUsuario);
 
 module.exports = router;
