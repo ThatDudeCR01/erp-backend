@@ -6,5 +6,5 @@ const tipoProductoSchema = new mongoose.Schema({
   descripcion: { type: String },
 });
 
-const TipoProducto = mongoose.model("TipoProducto", tipoProductoSchema);
+const TipoProducto = mongoose.model("TipoProductos", tipoProductoSchema);
 module.exports = TipoProducto;

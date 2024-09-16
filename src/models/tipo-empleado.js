@@ -10,5 +10,5 @@ const tipoEmpleadoSchema = new mongoose.Schema({
   },
 });
 
-const TipoEmpleado = mongoose.model("TipoEmpleado", tipoEmpleadoSchema);
+const TipoEmpleado = mongoose.model("TipoEmpleados", tipoEmpleadoSchema);
 module.exports = TipoEmpleado;

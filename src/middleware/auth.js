@@ -25,7 +25,7 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-const checkRoles = (allowedRoles) => {
+const checkPermisos = (allowedRoles) => {
   return (req, res, next) => {
     const hasRole = req.user.roles.some((role) => allowedRoles.includes(role));
 
@@ -38,4 +38,4 @@ const checkRoles = (allowedRoles) => {
   };
 };
 
-module.exports = { verifyToken, checkRoles };
+module.exports = { verifyToken, checkPermisos };

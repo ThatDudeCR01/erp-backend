@@ -8,6 +8,18 @@ const usuarioSchema = new mongoose.Schema({
   cedula: { type: String, unique: true, required: true },
   reiniciar_contraseña_token: { type: String },
   reiniciar_contraseña_token_expira: { type: Date },
+  default_role: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Roles",
+    required: true,
+  },
+  roles: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Roles",
+      required: true,
+    },
+  ],
   entidad_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Entidad",
@@ -15,6 +27,6 @@ const usuarioSchema = new mongoose.Schema({
   },
 });
 
-const Usuario = mongoose.model("Usuario", usuarioSchema);
+const Usuario = mongoose.model("Usuarios", usuarioSchema);
 
 module.exports = Usuario;

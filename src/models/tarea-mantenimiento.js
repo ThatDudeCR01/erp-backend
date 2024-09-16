@@ -7,7 +7,7 @@ const tareaMantenimientoSchema = new mongoose.Schema({
 });
 
 const TareaMantenimiento = mongoose.model(
-  "TareaMantenimiento",
+  "TareaMantenimientos",
   tareaMantenimientoSchema
 );
 
