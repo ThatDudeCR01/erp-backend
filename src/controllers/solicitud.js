@@ -1,14 +1,28 @@
 const Solicitud = require("../models/solicitudes");
+const handleValidationErrors = require("../config/validateResult");
+const { getUpdatedFields } = require("../utils/fieldUtils");
 
-exports.createSolicitud = async (req, res) => {
+const createSolicitud = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
-    const { nombre, fecha, empleadoSolicita, usuario_id } = req.body;
+    const {
+      nombre,
+      fecha,
+      descripcion,
+      estaAprobada,
+      empleadoSolicita_id,
+      empleadoAprueba_id,
+    } = req.body;
 
     const nuevaSolicitud = new Solicitud({
       nombre,
       fecha,
-      empleadoSolicita,
-      usuario_id,
+      descripcion,
+      estaAprobada,
+      empleadoSolicita_id,
+      empleadoAprueba_id,
     });
 
     await nuevaSolicitud.save();
@@ -20,7 +34,7 @@ exports.createSolicitud = async (req, res) => {
   }
 };
 
-exports.getAllSolicitudes = async (req, res) => {
+const getAllSolicitudes = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -32,11 +46,12 @@ exports.getAllSolicitudes = async (req, res) => {
     const searchCriteria = {
       $or: [
         { nombre: { $regex: filterRegex } },
-        { fecha: { $regex: filterRegex } },
+        { descripcion: { $regex: filterRegex } },
       ],
     };
 
     const solicitudes = await Solicitud.find(searchCriteria)
+      .select("nombre fecha descripcion -_id")
       .skip(skip)
       .limit(limit)
       .exec();
@@ -60,13 +75,15 @@ exports.getAllSolicitudes = async (req, res) => {
   }
 };
 
-exports.getSolicitudById = async (req, res) => {
+const getSolicitudById = async (req, res) => {
   try {
-    const solicitud = await Solicitud.findById(req.params.id);
+    const solicitud = await Solicitud.findById(req.params.id).select(
+      "nombre fecha descripcion -_id"
+    );
     if (!solicitud) {
       return res.status(404).json({ message: "Solicitud no encontrada" });
     }
-    res.status(200).json({ message: "Solicitud encontrada" });
+    res.status(200).json({ solicitud });
   } catch (error) {
     res
       .status(500)
@@ -74,67 +91,32 @@ exports.getSolicitudById = async (req, res) => {
   }
 };
 
-exports.updateSolicitud = async (req, res) => {
+const updateSolicitud = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
-    const { nombre, fecha, estaAprobada, empleadoSolicita, usuario_id } =
-      req.body;
+    const { nombre, descripcion } = req.body;
+    const campos = { nombre, descripcion };
 
     const solicitudActual = await Solicitud.findById(req.params.id);
     if (!solicitudActual) {
       return res.status(404).json({ message: "Solicitud no encontrada" });
     }
 
-    const updates = {};
-    let isModified = false;
+    const { updates, hasChanges, message } = getUpdatedFields(
+      campos,
+      solicitudActual
+    );
 
-    if (nombre && nombre !== solicitudActual.nombre) {
-      updates.nombre = nombre;
-      isModified = true;
+    if (!hasChanges) {
+      return res.status(200).json({ message });
     }
 
-    if (fecha && fecha !== solicitudActual.fecha.toISOString().split("T")[0]) {
-      updates.fecha = fecha;
-      isModified = true;
-    }
-
-    if (
-      typeof estaAprobada !== "undefined" &&
-      estaAprobada !== solicitudActual.estaAprobada
-    ) {
-      updates.estaAprobada = estaAprobada;
-      isModified = true;
-    }
-
-    if (
-      empleadoSolicita &&
-      empleadoSolicita.toString() !==
-        solicitudActual.empleadoSolicita.toString()
-    ) {
-      updates.empleadoSolicita = empleadoSolicita;
-      isModified = true;
-    }
-
-    if (
-      usuario_id &&
-      usuario_id.toString() !== solicitudActual.usuario_id.toString()
-    ) {
-      updates.usuario_id = usuario_id;
-      isModified = true;
-    }
-
-    if (!isModified) {
-      return res.status(200).json({
-        message: "La información es la misma, no se realizaron cambios.",
-      });
-    }
-
-    const solicitud = await Solicitud.findByIdAndUpdate(
+    const solicitudActualizada = await Solicitud.findByIdAndUpdate(
       req.params.id,
       { $set: updates },
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     );
 
     res.status(200).json({ message: "Solicitud actualizada con éxito" });
@@ -145,7 +127,7 @@ exports.updateSolicitud = async (req, res) => {
   }
 };
 
-exports.deleteSolicitud = async (req, res) => {
+const deleteSolicitud = async (req, res) => {
   try {
     const solicitud = await Solicitud.findByIdAndDelete(req.params.id);
     if (!solicitud) {
@@ -157,4 +139,12 @@ exports.deleteSolicitud = async (req, res) => {
       .status(500)
       .json({ message: "Error al eliminar solicitud", error: error.message });
   }
+};
+
+module.exports = {
+  createSolicitud,
+  getAllSolicitudes,
+  getSolicitudById,
+  updateSolicitud,
+  deleteSolicitud,
 };

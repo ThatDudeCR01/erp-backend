@@ -34,10 +34,10 @@ router.use("/productos", producto);
 router.use("/tipoProductos", tipoProducto);
 router.use("/empresas", empresa);
 router.use("/proyectos", proyecto);
+router.use("/solicitudes", solicitud);
+router.use("/tareasMantenimientos", tareasManteniento);
 // router.use("/horasFacturables", horasFacturables);
 // router.use("/mantenimientos", mantenimiento);
-// router.use("/solicitudes", solicitud);
-// router.use("/tareasMantenimientos", tareasManteniento);
 // router.use("/templates", template);
 
 module.exports = router;

@@ -10,6 +10,7 @@ const router = express.Router();
 const {
   contactoValidacion,
   actualizarContactoValidacion,
+  validarContactoId,
 } = require("../validators/contacto");
 
 router.get("/", getAllContactos);
@@ -20,6 +21,6 @@ router.post("/", contactoValidacion, createContacto);
 
 router.patch("/:id", actualizarContactoValidacion, updateContacto);
 
-router.delete("/:id", deleteContacto);
+router.delete("/:id", validarContactoId, deleteContacto);
 
 module.exports = router;

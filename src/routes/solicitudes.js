@@ -1,32 +1,29 @@
 const express = require("express");
-const solicitud = require("../controllers/solicitud");
+
+const {
+  createSolicitud,
+  getAllSolicitudes,
+  getSolicitudById,
+  deleteSolicitud,
+  updateSolicitud,
+} = require("../controllers/solicitud");
+
+const {
+  solicitudValidacion,
+  actualizarSolicitudValidacion,
+  validarSolicitudId,
+} = require("../validators/solicitud");
+
 const router = express.Router();
-const { validationResult } = require("express-validator");
-const solicitudValidacion = require("../validators/solicitud");
 
-router.get("/", solicitud.getAllSolicitudes);
+router.post("/", solicitudValidacion, createSolicitud);
 
-// Ruta para crear una nueva solicitud, aplicando las validaciones
-router.post("/", solicitudValidacion, (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  solicitud.createSolicitud(req, res, next);
-});
+router.get("/", getAllSolicitudes);
 
-router.get("/:id", solicitud.getSolicitudById);
+router.get("/:id", getSolicitudById);
 
-// Actualizar solicitud
-router.put("/:id", solicitudValidacion, (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  solicitud.updateSolicitud(req, res, next);
-});
+router.patch("/:id", actualizarSolicitudValidacion, updateSolicitud);
 
-// Eliminar solicitud
-router.delete("/:id", solicitud.deleteSolicitud);
+router.delete("/:id", validarSolicitudId, deleteSolicitud);
 
 module.exports = router;

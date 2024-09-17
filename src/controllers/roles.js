@@ -1,6 +1,11 @@
 const Roles = require("../models/roles");
+const handleValidationErrors = require("../config/validateResult");
+const { getUpdatedFields } = require("../utils/fieldUtils");
 
 const createRole = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
     const { nombre, permisos } = req.body;
 

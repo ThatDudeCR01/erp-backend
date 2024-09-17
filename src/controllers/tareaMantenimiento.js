@@ -1,9 +1,13 @@
 const TareaMantenimiento = require("../models/tarea-mantenimiento");
+const handleValidationErrors = require("../config/validateResult");
+const { getUpdatedFields } = require("../utils/fieldUtils");
 
-exports.createTareaMantenimiento = async (req, res) => {
+const createTareaMantenimiento = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
     const { nombre, tipo, descripcion } = req.body;
-
     const nuevaTareaMantenimiento = new TareaMantenimiento({
       nombre,
       tipo,
@@ -22,7 +26,7 @@ exports.createTareaMantenimiento = async (req, res) => {
   }
 };
 
-exports.getAllTareasMantenimiento = async (req, res) => {
+const getAllTareasMantenimiento = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -40,6 +44,7 @@ exports.getAllTareasMantenimiento = async (req, res) => {
     };
 
     const tareasMantenimiento = await TareaMantenimiento.find(searchCriteria)
+      .select("nombre tipo descripcion -_id")
       .skip(skip)
       .limit(limit)
       .exec();
@@ -63,15 +68,17 @@ exports.getAllTareasMantenimiento = async (req, res) => {
   }
 };
 
-exports.getTareaMantenimientoById = async (req, res) => {
+const getTareaMantenimientoById = async (req, res) => {
   try {
-    const tareaMantenimiento = await TareaMantenimiento.findById(req.params.id);
+    const tareaMantenimiento = await TareaMantenimiento.findById(
+      req.params.id
+    ).select("nombre tipo descripcion -_id");
     if (!tareaMantenimiento) {
       return res
         .status(404)
         .json({ message: "Tarea de mantenimiento no encontrada" });
     }
-    res.status(200).json({ message: "Tarea de mantenimiento encontrada" });
+    res.status(200).json({ tareaMantenimiento });
   } catch (error) {
     res.status(500).json({
       message: "Error al buscar tarea de mantenimiento",
@@ -80,50 +87,34 @@ exports.getTareaMantenimientoById = async (req, res) => {
   }
 };
 
-exports.updateTareaMantenimiento = async (req, res) => {
+const updateTareaMantenimiento = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
     const { nombre, tipo, descripcion } = req.body;
+    const campos = { nombre, tipo, descripcion };
 
-    const tareaMantenimientoActual = await TareaMantenimiento.findById(
-      req.params.id
-    );
+    const tareaMantenimientoActual = await Solicitud.findById(req.params.id);
     if (!tareaMantenimientoActual) {
       return res
         .status(404)
         .json({ message: "Tarea de mantenimiento no encontrada" });
     }
 
-    const updates = {};
-    let isModified = false;
+    const { updates, hasChanges, message } = getUpdatedFields(
+      campos,
+      tareaMantenimientoActual
+    );
 
-    if (nombre && nombre !== tareaMantenimientoActual.nombre) {
-      updates.nombre = nombre;
-      isModified = true;
+    if (!hasChanges) {
+      return res.status(200).json({ message });
     }
 
-    if (tipo && tipo !== tareaMantenimientoActual.tipo) {
-      updates.tipo = tipo;
-      isModified = true;
-    }
-
-    if (descripcion && descripcion !== tareaMantenimientoActual.descripcion) {
-      updates.descripcion = descripcion;
-      isModified = true;
-    }
-
-    if (!isModified) {
-      return res.status(200).json({
-        message: "La información es la misma, no se realizaron cambios.",
-      });
-    }
-
-    const tareaMantenimiento = await TareaMantenimiento.findByIdAndUpdate(
+    const tareaMantenimientoActualizada = await Solicitud.findByIdAndUpdate(
       req.params.id,
       { $set: updates },
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     );
 
     res
@@ -137,7 +128,7 @@ exports.updateTareaMantenimiento = async (req, res) => {
   }
 };
 
-exports.deleteTareaMantenimiento = async (req, res) => {
+const deleteTareaMantenimiento = async (req, res) => {
   try {
     const tareaMantenimiento = await TareaMantenimiento.findByIdAndDelete(
       req.params.id
@@ -156,4 +147,12 @@ exports.deleteTareaMantenimiento = async (req, res) => {
       error: error.message,
     });
   }
+};
+
+module.exports = {
+  createTareaMantenimiento,
+  getAllTareasMantenimiento,
+  getTareaMantenimientoById,
+  updateTareaMantenimiento,
+  deleteTareaMantenimiento,
 };

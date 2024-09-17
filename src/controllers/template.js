@@ -2,11 +2,11 @@ const Template = require("../models/template");
 
 exports.createTemplate = async (req, res) => {
   try {
-    const { nombre, tareasMantenimiento } = req.body;
+    const { empresa_id, template_id } = req.body;
 
     const nuevoTemplate = new Template({
-      nombre,
-      tareasMantenimiento,
+      empresa_id,
+      template_id,
     });
 
     await nuevoTemplate.save();

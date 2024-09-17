@@ -1,32 +1,31 @@
 const express = require("express");
-const tareaMantenimiento = require("../controllers/tareaMantenimiento");
+const {
+  createTareaMantenimiento,
+  getAllTareasMantenimiento,
+  getTareaMantenimientoById,
+  updateTareaMantenimiento,
+  deleteTareaMantenimiento,
+} = require("../controllers/tareaMantenimiento");
 const router = express.Router();
 const { validationResult } = require("express-validator");
-const tareaMantenimientoValidacion = require("../validators/tareaMantenimiento");
+const {
+  tareaMantenimientoValidacion,
+  actualizarTareaMantenimientoValidacion,
+  validarTareaMantenimientoId,
+} = require("../validators/tareaMantenimiento");
 
-router.get("/", tareaMantenimiento.getAllTareasMantenimiento);
+router.get("/", tareaMantenimientoValidacion, getAllTareasMantenimiento);
 
-// Ruta para crear una nueva tarea de mantenimiento, aplicando las validaciones
-router.post("/", tareaMantenimientoValidacion, (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  tareaMantenimiento.createTareaMantenimiento(req, res, next);
-});
+router.post("/", createTareaMantenimiento);
 
-router.get("/:id", tareaMantenimiento.getTareaMantenimientoById);
+router.get("/:id", getTareaMantenimientoById);
 
-// Actualizar tarea de mantenimiento
-router.put("/:id", tareaMantenimientoValidacion, (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  tareaMantenimiento.updateTareaMantenimiento(req, res, next);
-});
+router.patch(
+  "/:id",
+  actualizarTareaMantenimientoValidacion,
+  updateTareaMantenimiento
+);
 
-// Eliminar tarea de mantenimiento
-router.delete("/:id", tareaMantenimiento.deleteTareaMantenimiento);
+router.delete("/:id", validarTareaMantenimientoId, deleteTareaMantenimiento);
 
 module.exports = router;

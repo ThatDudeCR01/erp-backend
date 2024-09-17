@@ -1,6 +1,7 @@
 const { body } = require("express-validator");
 const mongoose = require("mongoose");
 const Entidad = require("../models/entidad");
+const Contacto = require("../models/contacto");
 
 const validarNombre = body("nombre")
   .notEmpty()
@@ -47,6 +48,24 @@ const validarEntidadId = body("entidad_id")
     return true;
   });
 
+const validarContactoId = body("contacto_id")
+  .notEmpty()
+  .withMessage("Debe proporcionar un ID de entidad")
+  .custom(async (value) => {
+    // Verifica si el ID es válido
+    if (!mongoose.Types.ObjectId.isValid(value)) {
+      throw new Error("El ID de la entidad no es válido");
+    }
+
+    // Verifica si la entidad existe en la base de datos
+    const entidadExistente = await Contacto.findById(value);
+    if (!entidadExistente) {
+      throw new Error("La entidad no se encontró en la base de datos");
+    }
+
+    return true;
+  });
+
 const validarTelefono = body("telefono")
   .notEmpty()
   .withMessage("El teléfono es requerido")
@@ -69,4 +88,5 @@ const actualizarContactoValidacion = [validarNombre, validarTelefono];
 module.exports = {
   contactoValidacion,
   actualizarContactoValidacion,
+  validarContactoId,
 };

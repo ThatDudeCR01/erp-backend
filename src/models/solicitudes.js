@@ -19,7 +19,3 @@ const solicitudSchema = new mongoose.Schema({
 
 const Solicitud = mongoose.model("Solicitud", solicitudSchema);
 module.exports = Solicitud;
-
-//seria necesario, agregar a la solicitud un encargado o administrador para revisar solicitudes pendientes, activas etc
-/*
- */
