@@ -101,7 +101,7 @@ const updateEmpresa = async (req, res) => {
       return res.status(200).json({ message });
     }
 
-    const empresa = await Empresa.findByIdAndUpdate(
+    await Empresa.findByIdAndUpdate(
       req.params.id,
       { $set: updates },
       { new: true, runValidators: true }

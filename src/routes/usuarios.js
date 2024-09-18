@@ -16,14 +16,14 @@ const {
   roleIdValidacion,
 } = require("../validators/usuario");
 
-router.get("/", checkPermisos("Usuarios/read"), getAllUsuarios);
-
 router.post(
   "/",
   usuarioValidacion,
   checkPermisos("Usuarios/create"),
   createUsuario
 );
+
+router.get("/", checkPermisos("Usuarios/read"), getAllUsuarios);
 
 router.get("/:id", checkPermisos("Usuarios/read"), getUsuarioById);
 

@@ -116,7 +116,7 @@ const updateEmpleado = async (req, res) => {
       return res.status(200).json({ message });
     }
 
-    const empleado = await Empleado.findByIdAndUpdate(
+    await Empleado.findByIdAndUpdate(
       req.params.id,
       { $set: updates },
       { new: true, runValidators: true }

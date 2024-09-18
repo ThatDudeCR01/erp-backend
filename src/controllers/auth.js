@@ -16,7 +16,7 @@ const login = async (req, res) => {
         .status(400)
         .json({ message: "Usuario o contraseña incorrectos." });
     }
-    
+
     const rolePermisos = await Rol.findById(usuario.active_role);
 
     const isMatch = await bcrypt.compare(contraseña, usuario.contraseña);

@@ -1,7 +1,8 @@
 const Entidad = require("../models/entidad");
 const handleValidationErrors = require("../config/validateResult");
+const { getUpdatedFields } = require("../utils/fieldUtils");
 
-exports.createEntidad = async (req, res) => {
+const createEntidad = async (req, res) => {
   if (handleValidationErrors(req, res)) {
     return;
   }
@@ -32,7 +33,7 @@ exports.createEntidad = async (req, res) => {
   }
 };
 
-exports.getAllEntidades = async (req, res) => {
+const getAllEntidades = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -73,7 +74,7 @@ exports.getAllEntidades = async (req, res) => {
   }
 };
 
-exports.getEntidadById = async (req, res) => {
+const getEntidadById = async (req, res) => {
   try {
     const entidad = await Entidad.findById(req.params.id);
     if (!entidad) {
@@ -87,20 +88,32 @@ exports.getEntidadById = async (req, res) => {
   }
 };
 
-exports.updateEntidad = async (req, res) => {
+const updateEntidad = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
+    const { nombre, apellido, telefono } = req.body;
+    const campos = { nombre, apellido, telefono };
+
     const entidadActual = await Entidad.findById(req.params.id);
     if (!entidadActual) {
       return res.status(404).json({ message: "Entidad no encontrada" });
     }
 
+    const { updates, hasChanges, message } = getUpdatedFields(
+      campos,
+      entidadActual
+    );
+
+    if (!hasChanges) {
+      return res.status(200).json({ message });
+    }
+
     await Entidad.findByIdAndUpdate(
       req.params.id,
-      { $set: req.body },
-      {
-        new: true,
-        runValidators: true,
-      }
+      { $set: updates },
+      { new: true, runValidators: true }
     );
 
     res.status(200).json({ message: "Entidad actualizada con éxito" });
@@ -111,7 +124,7 @@ exports.updateEntidad = async (req, res) => {
   }
 };
 
-exports.deleteEntidad = async (req, res) => {
+const deleteEntidad = async (req, res) => {
   try {
     const entidad = await Entidad.findByIdAndDelete(req.params.id);
     if (!entidad) {
@@ -123,4 +136,12 @@ exports.deleteEntidad = async (req, res) => {
       .status(500)
       .json({ message: "Error al eliminar entidad", error: error.message });
   }
+};
+
+module.exports = {
+  createEntidad,
+  getAllEntidades,
+  getEntidadById,
+  updateEntidad,
+  deleteEntidad,
 };

@@ -71,7 +71,7 @@ const validarEntidadId = body("entidad_id")
     return true;
   });
 
-const validarClienteId = body("cliente_id")
+const clienteIdValidacion = body("cliente_id")
   .notEmpty()
   .withMessage("Debe proporcionar un ID de cliente")
   .custom(async (value) => {
@@ -107,5 +107,5 @@ const actualizarClienteValidacion = [
 module.exports = {
   clienteValidacion,
   actualizarClienteValidacion,
-  validarClienteId,
+  clienteIdValidacion,
 };

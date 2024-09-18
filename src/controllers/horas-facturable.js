@@ -1,13 +1,19 @@
 const HorasFacturables = require("../models/horas-facturable");
+const handleValidationErrors = require("../config/validateResult");
+const { getUpdatedFields } = require("../utils/fieldUtils");
 
-exports.createHorasFacturables = async (req, res) => {
+const createHorasFacturables = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
-    const { number, id_proyecto, id_tipoEmpleado } = req.body;
+    const { nombre, precio, moneda, tipoEmpleado_id } = req.body;
 
     const nuevaHorasFacturables = new HorasFacturables({
-      number,
-      id_proyecto,
-      id_tipoEmpleado,
+      nombre,
+      precio,
+      moneda,
+      tipoEmpleado_id,
     });
 
     await nuevaHorasFacturables.save();
@@ -20,7 +26,7 @@ exports.createHorasFacturables = async (req, res) => {
   }
 };
 
-exports.getAllHorasFacturables = async (req, res) => {
+const getAllHorasFacturables = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -31,8 +37,8 @@ exports.getAllHorasFacturables = async (req, res) => {
 
     const searchCriteria = {
       $or: [
-        { id_proyecto: { $regex: filterRegex } },
-        { id_tipoEmpleado: { $regex: filterRegex } },
+        { nombre: { $regex: filterRegex } },
+        { moneda: { $regex: filterRegex } },
       ],
     };
 
@@ -60,7 +66,7 @@ exports.getAllHorasFacturables = async (req, res) => {
   }
 };
 
-exports.getHorasFacturablesById = async (req, res) => {
+const getHorasFacturablesById = async (req, res) => {
   try {
     const horasFacturables = await HorasFacturables.findById(req.params.id);
     if (!horasFacturables) {
@@ -77,9 +83,13 @@ exports.getHorasFacturablesById = async (req, res) => {
   }
 };
 
-exports.updateHorasFacturables = async (req, res) => {
+const updateHorasFacturables = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
-    const { number, id_proyecto, id_tipoEmpleado } = req.body;
+    const { nombre, precio, moneda } = req.body;
+    const campos = { nombre, precio, moneda };
 
     const horasFacturablesActual = await HorasFacturables.findById(
       req.params.id
@@ -90,44 +100,20 @@ exports.updateHorasFacturables = async (req, res) => {
         .json({ message: "Horas facturables no encontradas" });
     }
 
-    const updates = {};
-    let isModified = false;
+    // Verifica los campos que han cambiado
+    const { updates, hasChanges, message } = getUpdatedFields(
+      campos,
+      horasFacturablesActual
+    );
 
-    if (number && number !== horasFacturablesActual.number) {
-      updates.number = number;
-      isModified = true;
+    if (!hasChanges) {
+      return res.status(200).json({ message });
     }
 
-    if (
-      id_proyecto &&
-      id_proyecto.toString() !== horasFacturablesActual.id_proyecto.toString()
-    ) {
-      updates.id_proyecto = id_proyecto;
-      isModified = true;
-    }
-
-    if (
-      id_tipoEmpleado &&
-      id_tipoEmpleado.toString() !==
-        horasFacturablesActual.id_tipoEmpleado.toString()
-    ) {
-      updates.id_tipoEmpleado = id_tipoEmpleado;
-      isModified = true;
-    }
-
-    if (!isModified) {
-      return res.status(200).json({
-        message: "La información es la misma, no se realizaron cambios.",
-      });
-    }
-
-    const horasFacturables = await HorasFacturables.findByIdAndUpdate(
+    await HorasFacturables.findByIdAndUpdate(
       req.params.id,
       { $set: updates },
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     );
 
     res
@@ -141,7 +127,7 @@ exports.updateHorasFacturables = async (req, res) => {
   }
 };
 
-exports.deleteHorasFacturables = async (req, res) => {
+const deleteHorasFacturables = async (req, res) => {
   try {
     const horasFacturables = await HorasFacturables.findByIdAndDelete(
       req.params.id
@@ -158,4 +144,12 @@ exports.deleteHorasFacturables = async (req, res) => {
       error: error.message,
     });
   }
+};
+
+module.exports = {
+  createHorasFacturables,
+  getAllHorasFacturables,
+  getHorasFacturablesById,
+  updateHorasFacturables,
+  deleteHorasFacturables,
 };

@@ -7,7 +7,11 @@ const {
   updateEntidad,
   deleteEntidad,
 } = require("../controllers/entidad");
-const entidadValidacion = require("../validators/entidad");
+const {
+  entidadValidacion,
+  actualizarEntidadValidacion,
+  validarEntidadId,
+} = require("../validators/entidad");
 
 router.get("/", getAllEntidades);
 
@@ -15,8 +19,8 @@ router.post("/", entidadValidacion, createEntidad);
 
 router.get("/:id", getEntidadById);
 
-router.patch("/:id", updateEntidad);
+router.patch("/:id", actualizarEntidadValidacion, updateEntidad);
 
-router.delete("/:id", deleteEntidad);
+router.delete("/:id", validarEntidadId, deleteEntidad);
 
 module.exports = router;

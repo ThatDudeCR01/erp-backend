@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const contactoSchema = new mongoose.Schema({
   nombre: { type: String, required: true },
-  telefono: { type: String, required: true },
+  telefono: { type: String },
   correo: { type: String, required: true, unique: true },
   cedula: { type: String, required: true, unique: true },
   entidad_id: {
