@@ -14,7 +14,6 @@ const {
   empresaValidacion,
   actualizarEmpresaValidacion,
   validarEmpresaId,
-  roleIdValidacion,
 } = require("../validators/empresa");
 
 const { checkPermisos } = require("../middleware/auth");
@@ -32,7 +31,12 @@ router.get("/:id", checkPermisos("Empresas/read"), getEmpresaById);
 
 router.get("/empresas-por-cliente/:id", getEmpresaByClienteId);
 
-router.patch("/:id", checkPermisos("Empresas/update"), updateEmpresa);
+router.patch(
+  "/:id",
+  actualizarEmpresaValidacion,
+  checkPermisos("Empresas/update"),
+  updateEmpresa
+);
 
 router.patch("/active/:id", checkPermisos("Empresas/update"), changeActive);
 

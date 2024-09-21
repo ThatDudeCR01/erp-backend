@@ -79,12 +79,6 @@ const validarEmpresaId = body("empresa_id")
     return true;
   });
 
-const roleIdValidacion = [
-  body("role_id")
-    .isMongoId()
-    .withMessage("Invalid role ID. Must be a valid MongoDB ObjectId."),
-];
-
 // Agrupación de validaciones para la creación de una empresa
 const empresaValidacion = [
   validarNombre,
@@ -99,5 +93,4 @@ module.exports = {
   empresaValidacion,
   actualizarEmpresaValidacion,
   validarEmpresaId,
-  roleIdValidacion,
 };
