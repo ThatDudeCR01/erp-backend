@@ -14,6 +14,7 @@ const { checkPermisos } = require("../middleware/auth");
 const {
   usuarioValidacion,
   roleIdValidacion,
+  usuarioIdValidacion,
 } = require("../validators/usuario");
 
 router.post(
@@ -38,6 +39,11 @@ router.patch(
   changeRoleActivo
 );
 
-router.delete("/:id", checkPermisos("Usuarios/delete"), deleteUsuario);
+router.delete(
+  "/:id",
+  usuarioIdValidacion,
+  checkPermisos("Usuarios/delete"),
+  deleteUsuario
+);
 
 module.exports = router;

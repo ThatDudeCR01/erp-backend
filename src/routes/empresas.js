@@ -1,21 +1,46 @@
 const express = require("express");
 const {
-  getAllEmpresas,
   createEmpresa,
+  getAllEmpresas,
+  getEmpresaByClienteId,
   getEmpresaById,
   updateEmpresa,
   deleteEmpresa,
+  changeActive,
 } = require("../controllers/empresa");
 const router = express.Router();
 
-router.get("/", getAllEmpresas);
+const {
+  empresaValidacion,
+  actualizarEmpresaValidacion,
+  validarEmpresaId,
+  roleIdValidacion,
+} = require("../validators/empresa");
 
-router.get("/:id", getEmpresaById);
+const { checkPermisos } = require("../middleware/auth");
 
-router.post("/", createEmpresa);
+router.post(
+  "/",
+  empresaValidacion,
+  checkPermisos("Empresas/create"),
+  createEmpresa
+);
 
-router.patch("/:id", updateEmpresa);
+router.get("/", checkPermisos("Empresas/read"), getAllEmpresas);
 
-router.delete("/:id", deleteEmpresa);
+router.get("/:id", checkPermisos("Empresas/read"), getEmpresaById);
+
+router.get("/empresas-por-cliente/:id", getEmpresaByClienteId);
+
+router.patch("/:id", checkPermisos("Empresas/update"), updateEmpresa);
+
+router.patch("/active/:id", checkPermisos("Empresas/update"), changeActive);
+
+router.delete(
+  "/:id",
+  validarEmpresaId,
+  checkPermisos("Empresas/delete"),
+  deleteEmpresa
+);
 
 module.exports = router;

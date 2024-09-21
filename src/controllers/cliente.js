@@ -7,29 +7,28 @@ const createCliente = async (req, res) => {
   }
 
   try {
-    const { nombre, correo, telefono, identificacion, entidad_id } = req.body;
+    const {
+      nombre,
+      cedula,
+      apellido,
+      correo,
+      telefono,
+      default_role,
+      entidad_id,
+    } = req.body;
 
-    const [checkUserByCorreo, checkUserByIdentificacion] = await Promise.all([
-      Cliente.findOne({ correo }),
-      Cliente.findOne({ identificacion }),
-    ]);
-
-    if (checkUserByCorreo) {
+    const checkCliente = await Cliente.findOne({ correo });
+    if (checkCliente) {
       return res.status(400).json({ message: "El correo ya está en uso" });
-    }
-
-    if (checkUserByIdentificacion) {
-      return res
-        .status(400)
-        .json({ message: "La identificación ya está en uso" });
     }
 
     const nuevoCliente = new Cliente({
       nombre,
+      cedula,
       apellido,
       correo,
       telefono,
-      identificacion,
+      default_role,
       entidad_id,
     });
 
@@ -209,7 +208,7 @@ const addRole = async (req, res) => {
   const { role_id } = req.body;
 
   try {
-    const roleExists = await Roles.findById(role_id);
+    const roleExists = await Rol.findById(role_id);
     if (!roleExists) {
       return res.status(404).json({ message: "Role not found" });
     }

@@ -17,7 +17,7 @@ const login = async (req, res) => {
         .json({ message: "Usuario o contraseña incorrectos." });
     }
 
-    const rolePermisos = await Rol.findById(usuario.active_role);
+    const rolePermisos = await Rol.findById(usuario.default_role);
 
     const isMatch = await bcrypt.compare(contraseña, usuario.contraseña);
     if (!isMatch) {
@@ -33,7 +33,7 @@ const login = async (req, res) => {
         permisos: rolePermisos.permisos,
       },
       process.env.NODE_JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "3h" }
     );
 
     res.status(200).json({ message: "Autenticación exitosa", token });

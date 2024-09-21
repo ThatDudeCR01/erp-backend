@@ -21,23 +21,40 @@ const { checkPermisos } = require("../middleware/auth");
 router.post(
   "/",
   clienteValidacion,
-  checkPermisos("Cliente/create"),
+  checkPermisos("Clientes/create"),
   createCliente
 );
 
-router.get("/", checkPermisos("Cliente/read"), getAllClientes);
+router.get("/", checkPermisos("Clientes/read"), getAllClientes);
 
-router.get("/:id", getClienteById);
+router.get("/:id", checkPermisos("Clientes/read"), getClienteById);
 
-router.patch("/:id", actualizarClienteValidacion, updateCliente);
+router.patch(
+  "/active/:id",
+  checkPermisos("Clientes/update"),
+  actualizarClienteValidacion,
+  updateCliente
+);
 
-router.delete("/:id", clienteIdValidacion, deleteCliente);
+router.patch(
+  "/:id",
+  checkPermisos("Clientes/update"),
+  actualizarClienteValidacion,
+  updateCliente
+);
 
 router.patch(
   "/role/:id",
   clienteIdValidacion,
-  checkPermisos("Cliente/update"),
+  checkPermisos("Clientes/update"),
   changeRoleActivo
+);
+
+router.delete(
+  "/:id",
+  checkPermisos("Clientes/delete"),
+  clienteIdValidacion,
+  deleteCliente
 );
 
 module.exports = router;

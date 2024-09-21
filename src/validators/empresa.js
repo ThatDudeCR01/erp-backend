@@ -21,7 +21,18 @@ const validarCorreo = body("correo")
   .trim()
   .isEmail()
   .withMessage("Debe ser un correo electrónico válido")
-  .normalizeEmail();
+  .normalizeEmail()
+  .custom(async (value) => {
+    const empresa = await Empresa.findOne({ correo: value });
+    if (empresa) {
+      throw new Error("El correo ya está registrado");
+    }
+    return true;
+  });
+
+module.exports = {
+  validarCorreo,
+};
 
 // Validación para el campo tieneMantenimiento
 const validarTieneMantenimiento = body("tieneMantenimiento")
@@ -68,9 +79,11 @@ const validarEmpresaId = body("empresa_id")
     return true;
   });
 
-module.exports = {
-  validarEmpresaId,
-};
+const roleIdValidacion = [
+  body("role_id")
+    .isMongoId()
+    .withMessage("Invalid role ID. Must be a valid MongoDB ObjectId."),
+];
 
 // Agrupación de validaciones para la creación de una empresa
 const empresaValidacion = [
@@ -86,4 +99,5 @@ module.exports = {
   empresaValidacion,
   actualizarEmpresaValidacion,
   validarEmpresaId,
+  roleIdValidacion,
 };

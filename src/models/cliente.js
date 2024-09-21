@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const clienteSchema = new mongoose.Schema({
   nombre: { type: String, required: true },
+  activo: { type: Boolean, default: true },
   apellido: { type: String },
   correo: { type: String, required: true },
   telefono: { type: String },
@@ -11,7 +12,7 @@ const clienteSchema = new mongoose.Schema({
     ref: "Entidad",
     required: true,
   },
-  active_role: {
+  default_role: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Roles",
     required: true,

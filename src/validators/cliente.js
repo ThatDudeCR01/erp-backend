@@ -50,7 +50,15 @@ const validarCedula = body("cedula")
   .matches(/^\d+$/)
   .withMessage("La cédula debe contener solo números")
   .isLength({ min: 9, max: 12 })
-  .withMessage("La cédula debe tener entre 9 y 12 dígitos");
+  .withMessage("La cédula debe tener entre 9 y 12 dígitos")
+  .custom(async (value) => {
+    // Verificar si la cédula ya existe en la base de datos
+    const cedulaExistente = await Cliente.findOne({ cedula: value });
+    if (cedulaExistente) {
+      throw new Error("La cédula ya está registrada");
+    }
+    return true;
+  });
 
 // Validación para el campo entidad_id
 const validarEntidadId = body("entidad_id")

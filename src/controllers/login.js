@@ -20,6 +20,12 @@ const login = async (req, res) => {
         .json({ message: "Usuario o contraseña incorrectos." });
     }
 
+    if (!usuario.roles || usuario.roles.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "El usuario no tiene roles asignados." });
+    }
+
     const token = jwt.sign(
       { id: usuario._id, nombre: usuario.nombre },
       process.env.NODE_JWT_SECRET,

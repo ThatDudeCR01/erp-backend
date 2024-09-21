@@ -204,7 +204,7 @@ const addRole = async (req, res) => {
   const { role_id } = req.body;
 
   try {
-    const roleExists = await Roles.findById(role_id);
+    const roleExists = await Rol.findById(role_id);
     if (!roleExists) {
       return res.status(404).json({ message: "Role not found" });
     }
