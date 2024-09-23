@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const templateSchema = new mongoose.Schema({
   nombre: { type: String, required: true },
-  tareasMantenimiento: {
+  tareasMantenimiento_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "TareaMantenimiento",
     required: true,

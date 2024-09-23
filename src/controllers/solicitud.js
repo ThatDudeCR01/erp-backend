@@ -1,20 +1,12 @@
 const Solicitud = require("../models/solicitudes");
-const handleValidationErrors = require("../config/validateResult");
-const { getUpdatedFields } = require("../utils/fieldUtils");
 
 const createSolicitud = async (req, res) => {
   if (handleValidationErrors(req, res)) {
     return;
   }
   try {
-    const {
-      nombre,
-      fecha,
-      descripcion,
-      estaAprobada,
-      empleadoSolicita_id,
-      empleadoAprueba_id,
-    } = req.body;
+    const { nombre, fecha, descripcion, estaAprobada, empleadoSolicita_id } =
+      req.body;
 
     const nuevaSolicitud = new Solicitud({
       nombre,
@@ -22,7 +14,6 @@ const createSolicitud = async (req, res) => {
       descripcion,
       estaAprobada,
       empleadoSolicita_id,
-      empleadoAprueba_id,
     });
 
     await nuevaSolicitud.save();
@@ -113,7 +104,7 @@ const updateSolicitud = async (req, res) => {
       return res.status(200).json({ message });
     }
 
-    const solicitudActualizada = await Solicitud.findByIdAndUpdate(
+    await Solicitud.findByIdAndUpdate(
       req.params.id,
       { $set: updates },
       { new: true, runValidators: true }

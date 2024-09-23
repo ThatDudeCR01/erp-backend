@@ -1,6 +1,5 @@
 const TareaMantenimiento = require("../models/tarea-mantenimiento");
 const handleValidationErrors = require("../config/validateResult");
-const { getUpdatedFields } = require("../utils/fieldUtils");
 
 const createTareaMantenimiento = async (req, res) => {
   if (handleValidationErrors(req, res)) {
@@ -92,30 +91,19 @@ const updateTareaMantenimiento = async (req, res) => {
     return;
   }
   try {
-    const { nombre, tipo, descripcion } = req.body;
-    const campos = { nombre, tipo, descripcion };
-
-    const tareaMantenimientoActual = await Solicitud.findById(req.params.id);
+    const tareaMantenimientoActual = await TareaMantenimiento.findById(
+      req.params.id
+    );
     if (!tareaMantenimientoActual) {
       return res
         .status(404)
         .json({ message: "Tarea de mantenimiento no encontrada" });
     }
 
-    const { updates, hasChanges, message } = getUpdatedFields(
-      campos,
-      tareaMantenimientoActual
-    );
-
-    if (!hasChanges) {
-      return res.status(200).json({ message });
-    }
-
-    const tareaMantenimientoActualizada = await Solicitud.findByIdAndUpdate(
-      req.params.id,
-      { $set: updates },
-      { new: true, runValidators: true }
-    );
+    await TareaMantenimiento.findByIdAndUpdate(req.params.id, {
+      new: true,
+      runValidators: true,
+    });
 
     res
       .status(200)
