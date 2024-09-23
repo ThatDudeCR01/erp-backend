@@ -5,10 +5,6 @@ const {
   getClienteById,
   updateCliente,
   deleteCliente,
-  addRole,
-  removeRole,
-  changeActive,
-  changeRoleActivo,
 } = require("../controllers/cliente");
 const router = express.Router();
 const {
@@ -27,8 +23,6 @@ router.post(
 
 router.get("/", checkPermisos("Clientes/read"), getAllClientes);
 
-router.get("/:id", checkPermisos("Clientes/read"), getClienteById);
-
 router.patch(
   "/active/:id",
   checkPermisos("Clientes/update"),
@@ -36,18 +30,13 @@ router.patch(
   updateCliente
 );
 
+router.get("/:id", checkPermisos("Clientes/read"), getClienteById);
+
 router.patch(
   "/:id",
   checkPermisos("Clientes/update"),
   actualizarClienteValidacion,
   updateCliente
-);
-
-router.patch(
-  "/role/:id",
-  clienteIdValidacion,
-  checkPermisos("Clientes/update"),
-  changeRoleActivo
 );
 
 router.delete(

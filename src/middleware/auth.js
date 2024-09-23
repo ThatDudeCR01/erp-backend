@@ -29,12 +29,6 @@ const checkPermisos = (permisoParam) => {
   return (req, res, next) => {
     const permisos = req.user.permisos;
 
-    if (!permisos || permisos.length === 0) {
-      return res.status(403).json({
-        message: "Acceso denegado. El usuario no tiene permisos asignados.",
-      });
-    }
-
     const [tabla, action] = permisoParam.split("/");
 
     const permiso = permisos.find((p) => p.tabla === tabla);

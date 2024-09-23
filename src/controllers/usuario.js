@@ -16,7 +16,7 @@ const createUsuario = async (req, res) => {
       contraseña,
       cedula,
       entidad_id,
-      default_role,
+      rolPredeterminado,
       roles,
     } = req.body;
 
@@ -35,7 +35,7 @@ const createUsuario = async (req, res) => {
       contraseña: hashedPassword,
       cedula,
       entidad_id,
-      default_role,
+      rolPredeterminado,
       roles,
     });
 

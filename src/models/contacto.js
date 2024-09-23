@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const contactoSchema = new mongoose.Schema({
   nombre: { type: String, required: true },
   telefono: { type: String },
-  activo: { type: Boolean, default: true },
+  estaActivo: { type: Boolean, default: true },
   correo: { type: String, required: true, unique: true },
   cedula: { type: String, required: true, unique: true },
   entidad_id: {

@@ -1,13 +1,19 @@
 const Entidad = require("../models/entidad");
 const handleValidationErrors = require("../config/validateResult");
-const { getUpdatedFields } = require("../utils/fieldUtils");
 
 const createEntidad = async (req, res) => {
   if (handleValidationErrors(req, res)) {
     return;
   }
   try {
-    const { nombre, apellido, correo, telefono, cedula } = req.body;
+    const { nombre, correo, telefono, cedula } = req.body;
+
+    const checkEntidadCedula = await Entidad.findOne({ cedula });
+    if (checkEntidadCedula) {
+      return res.status(400).json({
+        message: "Ya existe una entidad con el correo proporcionado",
+      });
+    }
 
     const checkEntidad = await Entidad.findOne({ correo });
     if (checkEntidad) {
@@ -18,7 +24,6 @@ const createEntidad = async (req, res) => {
 
     const nuevaEntidad = new Entidad({
       nombre,
-      apellido,
       correo,
       telefono,
       cedula,
@@ -93,28 +98,15 @@ const updateEntidad = async (req, res) => {
     return;
   }
   try {
-    const { nombre, apellido, telefono } = req.body;
-    const campos = { nombre, apellido, telefono };
-
     const entidadActual = await Entidad.findById(req.params.id);
     if (!entidadActual) {
       return res.status(404).json({ message: "Entidad no encontrada" });
     }
 
-    const { updates, hasChanges, message } = getUpdatedFields(
-      campos,
-      entidadActual
-    );
-
-    if (!hasChanges) {
-      return res.status(200).json({ message });
-    }
-
-    await Entidad.findByIdAndUpdate(
-      req.params.id,
-      { $set: updates },
-      { new: true, runValidators: true }
-    );
+    await Entidad.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
     res.status(200).json({ message: "Entidad actualizada con éxito" });
   } catch (error) {

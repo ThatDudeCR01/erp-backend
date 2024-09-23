@@ -56,8 +56,8 @@ const validarCedula = body("cedula")
   .withMessage("La cédula es requerida")
   .matches(/^\d+$/)
   .withMessage("La cédula debe contener solo números")
-  .isLength({ min: 9, max: 12 })
-  .withMessage("La cédula debe tener entre 9 y 12 dígitos");
+  .isLength({ min: 9 })
+  .withMessage("La cédula debe tener minimo 9 caracteres");
 
 // Validación para el campo entidad_id
 const validarEntidadId = body("entidad_id")

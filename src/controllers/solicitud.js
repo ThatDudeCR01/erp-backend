@@ -1,14 +1,18 @@
 const Solicitud = require("../models/solicitudes");
+const handleValidationErrors = require("../config/validateResult");
 
 exports.createSolicitud = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
-    const { nombre, fecha, empleadoSolicita, usuario_id } = req.body;
+    const { nombre, fecha, empleadoSolicita_id, empleadoAprueba_id } = req.body;
 
     const nuevaSolicitud = new Solicitud({
       nombre,
       fecha,
-      empleadoSolicita,
-      usuario_id,
+      empleadoSolicita_id,
+      empleadoAprueba_id,
     });
 
     await nuevaSolicitud.save();

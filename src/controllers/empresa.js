@@ -1,8 +1,6 @@
 const Empresa = require("../models/empresa");
 const handleValidationErrors = require("../config/validateResult");
 const { getUpdatedFields } = require("../utils/fieldUtils");
-const Cliente = require("../models/cliente");
-const mongoose = require("mongoose");
 
 const createEmpresa = async (req, res) => {
   if (handleValidationErrors(req, res)) {
@@ -10,6 +8,11 @@ const createEmpresa = async (req, res) => {
   }
   try {
     const { nombre, correo, cliente_id } = req.body;
+
+    const checkEmpresa = await Empresa.findOne({ correo });
+    if (checkEmpresa) {
+      return res.status(400).json({ message: "El correo ya esta en uso" });
+    }
 
     const nuevaEmpresa = new Empresa({
       nombre,
@@ -132,6 +135,9 @@ const deleteEmpresa = async (req, res) => {
 };
 
 const getEmpresaByClienteId = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
     const { cliente_id } = req.body;
     const page = parseInt(req.query.page) || 1;
@@ -148,14 +154,6 @@ const getEmpresaByClienteId = async (req, res) => {
         { correo: { $regex: filterRegex } },
       ],
     };
-
-    if (!cliente_id) {
-      return res.status(400).json({ message: "El cliente_id es requerido." });
-    }
-
-    if (!mongoose.Types.ObjectId.isValid(cliente_id)) {
-      return res.status(400).json({ message: "El cliente_id no es válido." });
-    }
 
     const empresas = await Empresa.find(searchCriteria)
       .select("nombre correo telefono -_id")
@@ -187,8 +185,8 @@ const changeActive = async (req, res) => {
       return res.status(404).json({ message: "Empresa no encontrada" });
     }
 
-    const active = !empresa.activo;
-    await Empresa.findByIdAndUpdate(req.params.id, { activo: active });
+    const active = !empresa.estaActivo;
+    await Empresa.findByIdAndUpdate(req.params.id, { estaActivo: active });
 
     res.status(200).json({ message: "Estado de empresa actualizado" });
   } catch (error) {

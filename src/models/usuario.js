@@ -8,8 +8,8 @@ const usuarioSchema = new mongoose.Schema({
   cedula: { type: String, unique: true, required: true },
   reiniciar_contraseña_token: { type: String },
   reiniciar_contraseña_token_expira: { type: Date },
-  activo: { type: Boolean, default: true },
-  default_role: {
+  estaActivo: { type: Boolean, default: true },
+  rolPredeterminado: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Roles",
     required: true,

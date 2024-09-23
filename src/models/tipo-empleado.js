@@ -2,7 +2,11 @@ const mongoose = require("mongoose");
 
 const tipoEmpleadoSchema = new mongoose.Schema({
   nombre: { type: String, required: true },
-  precioxHora: { type: Number },
+  horasFacturables_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "HorasFacturables",
+    required: true,
+  },
   empleado_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Empleado",

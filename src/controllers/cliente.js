@@ -7,19 +7,23 @@ const createCliente = async (req, res) => {
   }
 
   try {
-    const {
-      nombre,
-      cedula,
-      apellido,
-      correo,
-      telefono,
-      default_role,
-      entidad_id,
-    } = req.body;
+    const { nombre, cedula, apellido, correo, telefono, entidad_id } = req.body;
 
-    const checkCliente = await Cliente.findOne({ correo });
-    if (checkCliente) {
-      return res.status(400).json({ message: "El correo ya está en uso" });
+    const clienteDuplicado = await Cliente.findOne({
+      $or: [{ correo: correo }, { cedula: cedula }, { entidad_id: entidad_id }],
+    });
+
+    if (clienteDuplicado) {
+      if (clienteDuplicado.correo === correo) {
+        return res.status(400).json({ message: "El correo ya está en uso" });
+      } else if (clienteDuplicado.cedula === cedula) {
+        return res.status(400).json({ message: "La cedula ya está en uso" });
+      } else if (clienteDuplicado.entidad_id.toString() === entidad_id) {
+        return res.status(400).json({
+          message:
+            "Ya existe un cliente asociado a esta entidad. No puede crear otro cliente con el mismo entidad_id.",
+        });
+      }
     }
 
     const nuevoCliente = new Cliente({
@@ -28,7 +32,6 @@ const createCliente = async (req, res) => {
       apellido,
       correo,
       telefono,
-      default_role,
       entidad_id,
     });
 
@@ -159,117 +162,6 @@ const changeActive = async (req, res) => {
   }
 };
 
-const changeRoleActivo = async (req, res) => {
-  if (handleValidationErrors(req, res)) {
-    return;
-  }
-  const { id } = req.params;
-  const { role_id } = req.body;
-
-  try {
-    const roleExists = await Roles.findById(role_id);
-
-    if (!roleExists) {
-      return res.status(404).json({ message: "Role not found" });
-    }
-
-    const cliente = await Cliente.findById(id);
-
-    if (!cliente) {
-      return res.status(404).json({ message: "Client not found" });
-    }
-
-    if (!cliente.roles.includes(role_id)) {
-      return res.status(400).json({
-        message: "The specified role is not associated with this client.",
-      });
-    }
-
-    cliente.active_role = role_id;
-    await cliente.save();
-
-    res.status(200).json({
-      message: "Active role updated successfully",
-      active_role: cliente.active_role,
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
-};
-
-// Agregar un rol a un cliente
-const addRole = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
-  const { id } = req.params;
-  const { role_id } = req.body;
-
-  try {
-    const roleExists = await Rol.findById(role_id);
-    if (!roleExists) {
-      return res.status(404).json({ message: "Role not found" });
-    }
-
-    const cliente = await Cliente.findById(id);
-    if (!cliente) {
-      return res.status(404).json({ message: "Client not found" });
-    }
-
-    if (cliente.roles.includes(role_id)) {
-      return res
-        .status(400)
-        .json({ message: "Role already assigned to the client" });
-    }
-
-    cliente.roles.push(role_id);
-    await cliente.save();
-
-    res.status(200).json({
-      message: "Role added successfully",
-      roles: cliente.roles,
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
-};
-
-// Eliminar un rol de un cliente
-const removeRole = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
-  const { id } = req.params;
-  const { role_id } = req.body;
-
-  try {
-    const cliente = await Cliente.findById(id);
-    if (!cliente) {
-      return res.status(404).json({ message: "Client not found" });
-    }
-
-    if (!cliente.roles.includes(role_id)) {
-      return res
-        .status(400)
-        .json({ message: "Role not assigned to the client" });
-    }
-
-    cliente.roles = cliente.roles.filter((role) => role.toString() !== role_id);
-    await cliente.save();
-
-    res.status(200).json({
-      message: "Role removed successfully",
-      roles: cliente.roles,
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
-};
-
 module.exports = {
   createCliente,
   getAllClientes,
@@ -277,7 +169,4 @@ module.exports = {
   updateCliente,
   deleteCliente,
   changeActive,
-  changeRoleActivo,
-  addRole,
-  removeRole,
 };

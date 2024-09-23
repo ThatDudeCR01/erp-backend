@@ -1,6 +1,5 @@
 const Contacto = require("../models/contacto");
 const handleValidationErrors = require("../config/validateResult");
-const { getUpdatedFields } = require("../utils/fieldUtils");
 
 const createContacto = async (req, res) => {
   if (handleValidationErrors(req, res)) {
@@ -90,26 +89,14 @@ const updateContacto = async (req, res) => {
     return;
   }
   try {
-    const { nombre, apellido, correo, telefono } = req.body;
-    const campos = { nombre, apellido, correo, telefono };
-
     const contactoActual = await Contacto.findById(req.params.id);
     if (!contactoActual) {
       return res.status(404).json({ message: "Contacto no encontrado" });
     }
 
-    const { updates, hasChanges, message } = getUpdatedFields(
-      campos,
-      contactoActual
-    );
-
-    if (!hasChanges) {
-      return res.status(200).json({ message });
-    }
-
-    const contacto = await Contacto.findByIdAndUpdate(
+    await Contacto.findByIdAndUpdate(
       req.params.id,
-      { $set: updates },
+      { $set: req.body },
       { new: true, runValidators: true }
     );
     res.status(200).json({ message: "Contacto actualizado con éxito" });

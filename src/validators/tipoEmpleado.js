@@ -20,12 +20,7 @@ const tipoEmpleadoValidacion = [
   body("empleado_id")
     .notEmpty()
     .withMessage("El ID del empleado es requerido")
-    .custom((value) => {
-      if (!mongoose.Types.ObjectId.isValid(value)) {
-        throw new Error("El ID del empleado no es válido");
-      }
-      return true;
-    }),
+    .isMongoId(),
 ];
 
 module.exports = tipoEmpleadoValidacion;

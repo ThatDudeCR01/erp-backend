@@ -33,7 +33,7 @@ const login = async (req, res) => {
         permisos: rolePermisos.permisos,
       },
       process.env.NODE_JWT_SECRET,
-      { expiresIn: "3h" }
+      { expiresIn: "3d" }
     );
 
     res.status(200).json({ message: "Autenticación exitosa", token });

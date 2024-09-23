@@ -1,6 +1,5 @@
 const HorasFacturables = require("../models/horas-facturable");
 const handleValidationErrors = require("../config/validateResult");
-const { getUpdatedFields } = require("../utils/fieldUtils");
 
 const createHorasFacturables = async (req, res) => {
   if (handleValidationErrors(req, res)) {
@@ -28,6 +27,7 @@ const createHorasFacturables = async (req, res) => {
 
 const getAllHorasFacturables = async (req, res) => {
   try {
+    const { tipoEmpleado_id } = req.body;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
@@ -36,6 +36,7 @@ const getAllHorasFacturables = async (req, res) => {
     const filterRegex = new RegExp(filter, "i");
 
     const searchCriteria = {
+      ...(tipoEmpleado_id && { tipoEmpleado_id }),
       $or: [
         { nombre: { $regex: filterRegex } },
         { moneda: { $regex: filterRegex } },
@@ -88,9 +89,6 @@ const updateHorasFacturables = async (req, res) => {
     return;
   }
   try {
-    const { nombre, precio, moneda } = req.body;
-    const campos = { nombre, precio, moneda };
-
     const horasFacturablesActual = await HorasFacturables.findById(
       req.params.id
     );
@@ -99,22 +97,10 @@ const updateHorasFacturables = async (req, res) => {
         .status(404)
         .json({ message: "Horas facturables no encontradas" });
     }
-
-    // Verifica los campos que han cambiado
-    const { updates, hasChanges, message } = getUpdatedFields(
-      campos,
-      horasFacturablesActual
-    );
-
-    if (!hasChanges) {
-      return res.status(200).json({ message });
-    }
-
-    await HorasFacturables.findByIdAndUpdate(
-      req.params.id,
-      { $set: updates },
-      { new: true, runValidators: true }
-    );
+    await HorasFacturables.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
     res
       .status(200)

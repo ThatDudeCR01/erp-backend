@@ -1,12 +1,16 @@
 const mongoose = require("mongoose");
+const moment = require("moment-timezone");
 
 const solicitudSchema = new mongoose.Schema({
   nombre: { type: String, required: true },
   fechaCreacion: {
     type: Date,
-    default: Date.now,
+    default: () => moment().tz("America/Costa_Rica").toDate(),
   },
-  fechaResuelto: { type: Date, required: true },
+  fechaResuelto: {
+    type: Date,
+    set: (date) => moment(date).tz("America/Costa_Rica").toDate(),
+  },
   descripcion: { type: String, required: false },
   estaAprobada: { type: Boolean, default: false },
 
@@ -23,7 +27,3 @@ const solicitudSchema = new mongoose.Schema({
 
 const Solicitud = mongoose.model("Solicitudes", solicitudSchema);
 module.exports = Solicitud;
-
-//seria necesario, agregar a la solicitud un encargado o administrador para revisar solicitudes pendientes, activas etc
-/*
- */
