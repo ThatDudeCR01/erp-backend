@@ -14,15 +14,28 @@ const createCliente = async (req, res) => {
     });
 
     if (clienteDuplicado) {
-      if (clienteDuplicado.correo === correo) {
-        return res.status(400).json({ message: "El correo ya está en uso" });
-      } else if (clienteDuplicado.cedula === cedula) {
-        return res.status(400).json({ message: "La cedula ya está en uso" });
-      } else if (clienteDuplicado.entidad_id.toString() === entidad_id) {
-        return res.status(400).json({
-          message:
-            "Ya existe un cliente asociado a esta entidad. No puede crear otro cliente con el mismo entidad_id.",
-        });
+      let errorMessage = "";
+
+      switch (true) {
+        case clienteDuplicado.correo === correo:
+          errorMessage = "El correo ya está en uso";
+          break;
+
+        case clienteDuplicado.cedula === cedula:
+          errorMessage = "La cedula ya está en uso";
+          break;
+
+        case clienteDuplicado.entidad_id.toString() === entidad_id:
+          errorMessage =
+            "Ya existe un cliente asociado a esta entidad. No puede crear otro cliente con el mismo entidad_id.";
+          break;
+
+        default:
+          break;
+      }
+
+      if (errorMessage) {
+        return res.status(400).json({ message: errorMessage });
       }
     }
 

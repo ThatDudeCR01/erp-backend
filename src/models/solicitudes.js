@@ -1,17 +1,15 @@
 const mongoose = require("mongoose");
-const moment = require("moment-timezone");
 
 const solicitudSchema = new mongoose.Schema({
   nombre: { type: String, required: true },
   fechaCreacion: {
     type: Date,
-    default: () => moment().tz("America/Costa_Rica").toDate(),
+    require: true,
   },
   fechaResuelto: {
     type: Date,
-    set: (date) => moment(date).tz("America/Costa_Rica").toDate(),
   },
-  descripcion: { type: String, required: false },
+  descripcion: { type: String },
   estaAprobada: { type: Boolean, default: false },
 
   empleadoSolicita_id: {

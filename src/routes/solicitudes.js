@@ -1,32 +1,22 @@
 const express = require("express");
-const solicitud = require("../controllers/solicitud");
+const {
+  createSolicitud,
+  getAllSolicitudes,
+  getSolicitudById,
+  updateSolicitud,
+  deleteSolicitud,
+} = require("../controllers/solicitud");
 const router = express.Router();
 const { validationResult } = require("express-validator");
-//const {solicitudValidacion} = require("../validators/solicitud");
 
-router.get("/", solicitud.getAllSolicitudes);
+router.get("/", getAllSolicitudes);
 
-// Ruta para crear una nueva solicitud, aplicando las validaciones
-router.post("/", (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  solicitud.createSolicitud(req, res, next);
-});
+router.post("/", createSolicitud);
 
-router.get("/:id", solicitud.getSolicitudById);
+router.get("/:id", getSolicitudById);
 
-// Actualizar solicitud
-router.put("/:id", (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  solicitud.updateSolicitud(req, res, next);
-});
+router.patch("/:id", updateSolicitud);
 
-// Eliminar solicitud
-router.delete("/:id", solicitud.deleteSolicitud);
+router.delete("/:id", deleteSolicitud);
 
 module.exports = router;
