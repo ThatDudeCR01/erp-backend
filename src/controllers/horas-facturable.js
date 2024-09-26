@@ -1,13 +1,18 @@
 const HorasFacturables = require("../models/horas-facturable");
+const handleValidationErrors = require("../config/validateResult");
 
-exports.createHorasFacturables = async (req, res) => {
+const createHorasFacturables = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
-    const { number, id_proyecto, id_tipoEmpleado } = req.body;
+    const { nombre, precio, moneda, tipoEmpleado_id } = req.body;
 
     const nuevaHorasFacturables = new HorasFacturables({
-      number,
-      id_proyecto,
-      id_tipoEmpleado,
+      nombre,
+      precio,
+      moneda,
+      tipoEmpleado_id,
     });
 
     await nuevaHorasFacturables.save();
@@ -20,8 +25,9 @@ exports.createHorasFacturables = async (req, res) => {
   }
 };
 
-exports.getAllHorasFacturables = async (req, res) => {
+const getAllHorasFacturables = async (req, res) => {
   try {
+    const { tipoEmpleado_id } = req.body;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
@@ -30,9 +36,10 @@ exports.getAllHorasFacturables = async (req, res) => {
     const filterRegex = new RegExp(filter, "i");
 
     const searchCriteria = {
+      ...(tipoEmpleado_id && { tipoEmpleado_id }),
       $or: [
-        { id_proyecto: { $regex: filterRegex } },
-        { id_tipoEmpleado: { $regex: filterRegex } },
+        { nombre: { $regex: filterRegex } },
+        { moneda: { $regex: filterRegex } },
       ],
     };
 
@@ -60,7 +67,7 @@ exports.getAllHorasFacturables = async (req, res) => {
   }
 };
 
-exports.getHorasFacturablesById = async (req, res) => {
+const getHorasFacturablesById = async (req, res) => {
   try {
     const horasFacturables = await HorasFacturables.findById(req.params.id);
     if (!horasFacturables) {
@@ -77,10 +84,11 @@ exports.getHorasFacturablesById = async (req, res) => {
   }
 };
 
-exports.updateHorasFacturables = async (req, res) => {
+const updateHorasFacturables = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
-    const { number, id_proyecto, id_tipoEmpleado } = req.body;
-
     const horasFacturablesActual = await HorasFacturables.findById(
       req.params.id
     );
@@ -89,46 +97,10 @@ exports.updateHorasFacturables = async (req, res) => {
         .status(404)
         .json({ message: "Horas facturables no encontradas" });
     }
-
-    const updates = {};
-    let isModified = false;
-
-    if (number && number !== horasFacturablesActual.number) {
-      updates.number = number;
-      isModified = true;
-    }
-
-    if (
-      id_proyecto &&
-      id_proyecto.toString() !== horasFacturablesActual.id_proyecto.toString()
-    ) {
-      updates.id_proyecto = id_proyecto;
-      isModified = true;
-    }
-
-    if (
-      id_tipoEmpleado &&
-      id_tipoEmpleado.toString() !==
-        horasFacturablesActual.id_tipoEmpleado.toString()
-    ) {
-      updates.id_tipoEmpleado = id_tipoEmpleado;
-      isModified = true;
-    }
-
-    if (!isModified) {
-      return res.status(200).json({
-        message: "La información es la misma, no se realizaron cambios.",
-      });
-    }
-
-    const horasFacturables = await HorasFacturables.findByIdAndUpdate(
-      req.params.id,
-      { $set: updates },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+    await HorasFacturables.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
     res
       .status(200)
@@ -141,7 +113,7 @@ exports.updateHorasFacturables = async (req, res) => {
   }
 };
 
-exports.deleteHorasFacturables = async (req, res) => {
+const deleteHorasFacturables = async (req, res) => {
   try {
     const horasFacturables = await HorasFacturables.findByIdAndDelete(
       req.params.id
@@ -158,4 +130,12 @@ exports.deleteHorasFacturables = async (req, res) => {
       error: error.message,
     });
   }
+};
+
+module.exports = {
+  createHorasFacturables,
+  getAllHorasFacturables,
+  getHorasFacturablesById,
+  updateHorasFacturables,
+  deleteHorasFacturables,
 };

@@ -89,44 +89,16 @@ const updateContacto = async (req, res) => {
     return;
   }
   try {
-    const { nombre, apellido, telefono, entidad } = req.body;
     const contactoActual = await Contacto.findById(req.params.id);
-
     if (!contactoActual) {
       return res.status(404).json({ message: "Contacto no encontrado" });
     }
 
-    // Definir los campos a actualizar
-    const campos = { nombre, apellido, telefono };
-    const updates = {};
-
-    // Recorrer los campos y actualizar solo si hay cambios
-    Object.keys(campos).forEach((key) => {
-      if (
-        campos[key] &&
-        campos[key].toString() !== contactoActual[key]?.toString()
-      ) {
-        updates[key] = campos[key];
-      }
-    });
-
-    // Verificar si hay cambios
-    if (Object.keys(updates).length === 0) {
-      return res.status(200).json({
-        message: "La información es la misma, no se realizaron cambios.",
-      });
-    }
-
-    // Actualizar el contacto
-    const contacto = await Contacto.findByIdAndUpdate(
+    await Contacto.findByIdAndUpdate(
       req.params.id,
-      { $set: updates },
-      {
-        new: true,
-        runValidators: true,
-      }
+      { $set: req.body },
+      { new: true, runValidators: true }
     );
-
     res.status(200).json({ message: "Contacto actualizado con éxito" });
   } catch (error) {
     res

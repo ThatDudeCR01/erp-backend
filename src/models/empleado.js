@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const empleadoSchema = new mongoose.Schema({
   nombre: { type: String, required: true },
+  estaActivo: { type: Boolean, default: true },
   apellido: { type: String },
   identificacion: { type: String, required: true, unique: true },
   correo: { type: String },

@@ -2,25 +2,48 @@ const express = require("express");
 const {
   createCliente,
   getAllClientes,
-  updateCliente,
   getClienteById,
+  updateCliente,
   deleteCliente,
 } = require("../controllers/cliente");
 const router = express.Router();
 const {
   clienteValidacion,
   actualizarClienteValidacion,
-  validarClienteId,
+  clienteIdValidacion,
 } = require("../validators/cliente");
+const { checkPermisos } = require("../middleware/auth");
 
-router.get("/", getAllClientes);
+router.post(
+  "/",
+  clienteValidacion,
+  checkPermisos("Clientes/create"),
+  createCliente
+);
 
-router.post("/", clienteValidacion, createCliente);
+router.get("/", checkPermisos("Clientes/read"), getAllClientes);
 
-router.get("/:id", getClienteById);
+router.patch(
+  "/active/:id",
+  checkPermisos("Clientes/update"),
+  actualizarClienteValidacion,
+  updateCliente
+);
 
-router.patch("/:id", actualizarClienteValidacion, updateCliente);
+router.get("/:id", checkPermisos("Clientes/read"), getClienteById);
 
-router.delete("/:id", validarClienteId, deleteCliente);
+router.patch(
+  "/:id",
+  checkPermisos("Clientes/update"),
+  actualizarClienteValidacion,
+  updateCliente
+);
+
+router.delete(
+  "/:id",
+  checkPermisos("Clientes/delete"),
+  clienteIdValidacion,
+  deleteCliente
+);
 
 module.exports = router;

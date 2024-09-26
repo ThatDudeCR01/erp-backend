@@ -14,9 +14,8 @@ const { checkPermisos } = require("../middleware/auth");
 const {
   usuarioValidacion,
   roleIdValidacion,
+  usuarioIdValidacion,
 } = require("../validators/usuario");
-
-router.get("/", checkPermisos("Usuarios/read"), getAllUsuarios);
 
 router.post(
   "/",
@@ -24,6 +23,8 @@ router.post(
   checkPermisos("Usuarios/create"),
   createUsuario
 );
+
+router.get("/", checkPermisos("Usuarios/read"), getAllUsuarios);
 
 router.get("/:id", checkPermisos("Usuarios/read"), getUsuarioById);
 
@@ -38,6 +39,11 @@ router.patch(
   changeRoleActivo
 );
 
-router.delete("/:id", checkPermisos("Usuarios/delete"), deleteUsuario);
+router.delete(
+  "/:id",
+  usuarioIdValidacion,
+  checkPermisos("Usuarios/delete"),
+  deleteUsuario
+);
 
 module.exports = router;

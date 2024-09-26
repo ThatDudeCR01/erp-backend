@@ -9,6 +9,11 @@ const createEmpresa = async (req, res) => {
   try {
     const { nombre, correo, cliente_id } = req.body;
 
+    const checkEmpresa = await Empresa.findOne({ correo });
+    if (checkEmpresa) {
+      return res.status(400).json({ message: "El correo ya esta en uso" });
+    }
+
     const nuevaEmpresa = new Empresa({
       nombre,
       correo,
@@ -101,7 +106,7 @@ const updateEmpresa = async (req, res) => {
       return res.status(200).json({ message });
     }
 
-    const empresa = await Empresa.findByIdAndUpdate(
+    await Empresa.findByIdAndUpdate(
       req.params.id,
       { $set: updates },
       { new: true, runValidators: true }
@@ -129,10 +134,75 @@ const deleteEmpresa = async (req, res) => {
   }
 };
 
+const getEmpresaByClienteId = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
+  try {
+    const { cliente_id } = req.body;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const filter = req.query.filter || "";
+
+    const filterRegex = new RegExp(filter, "i");
+
+    const searchCriteria = {
+      cliente_id,
+      $or: [
+        { nombre: { $regex: filterRegex } },
+        { correo: { $regex: filterRegex } },
+      ],
+    };
+
+    const empresas = await Empresa.find(searchCriteria)
+      .select("nombre correo telefono -_id")
+      .skip(skip)
+      .limit(limit)
+      .exec();
+
+    const totalEmpresas = await Empresa.countDocuments(searchCriteria).exec();
+
+    res.send({
+      page,
+      limit,
+      totalPages: Math.ceil(totalEmpresas / limit),
+      totalEmpresas,
+      empresas,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al buscar empresas",
+      errorMessage: error.message,
+    });
+  }
+};
+
+const changeActive = async (req, res) => {
+  try {
+    const empresa = await Empresa.findById(req.params.id);
+    if (!empresa) {
+      return res.status(404).json({ message: "Empresa no encontrada" });
+    }
+
+    const active = !empresa.estaActivo;
+    await Empresa.findByIdAndUpdate(req.params.id, { estaActivo: active });
+
+    res.status(200).json({ message: "Estado de empresa actualizado" });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al actualizar el estado de la empresa",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   createEmpresa,
   getAllEmpresas,
   getEmpresaById,
+  getEmpresaByClienteId,
   updateEmpresa,
   deleteEmpresa,
+  changeActive,
 };

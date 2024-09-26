@@ -16,8 +16,13 @@ const login = async (req, res) => {
         .status(400)
         .json({ message: "Usuario o contraseña incorrectos." });
     }
-    
-    const rolePermisos = await Rol.findById(usuario.active_role);
+
+    const rolePermisos = await Rol.findById(usuario.rolPredeterminado);
+    if (!rolePermisos) {
+      return res
+        .status(400)
+        .json({ message: "Rol no encontrado para el usuario." });
+    }
 
     const isMatch = await bcrypt.compare(contraseña, usuario.contraseña);
     if (!isMatch) {
@@ -30,10 +35,10 @@ const login = async (req, res) => {
       {
         id: usuario._id,
         nombre: usuario.nombre,
-        permisos: rolePermisos.permisos,
+        permisos: rolePermisos.rolPredeterminado,
       },
       process.env.NODE_JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "3d" }
     );
 
     res.status(200).json({ message: "Autenticación exitosa", token });

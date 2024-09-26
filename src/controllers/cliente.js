@@ -7,29 +7,44 @@ const createCliente = async (req, res) => {
   }
 
   try {
-    const { nombre, correo, telefono, identificacion, entidad_id } = req.body;
+    const { nombre, cedula, apellido, correo, telefono, entidad_id } = req.body;
 
-    const [checkUserByCorreo, checkUserByIdentificacion] = await Promise.all([
-      Cliente.findOne({ correo }),
-      Cliente.findOne({ identificacion }),
-    ]);
+    const clienteDuplicado = await Cliente.findOne({
+      $or: [{ correo: correo }, { cedula: cedula }, { entidad_id: entidad_id }],
+    });
 
-    if (checkUserByCorreo) {
-      return res.status(400).json({ message: "El correo ya está en uso" });
-    }
+    if (clienteDuplicado) {
+      let errorMessage = "";
 
-    if (checkUserByIdentificacion) {
-      return res
-        .status(400)
-        .json({ message: "La identificación ya está en uso" });
+      switch (true) {
+        case clienteDuplicado.correo === correo:
+          errorMessage = "El correo ya está en uso";
+          break;
+
+        case clienteDuplicado.cedula === cedula:
+          errorMessage = "La cedula ya está en uso";
+          break;
+
+        case clienteDuplicado.entidad_id.toString() === entidad_id:
+          errorMessage =
+            "Ya existe un cliente asociado a esta entidad. No puede crear otro cliente con el mismo entidad_id.";
+          break;
+
+        default:
+          break;
+      }
+
+      if (errorMessage) {
+        return res.status(400).json({ message: errorMessage });
+      }
     }
 
     const nuevoCliente = new Cliente({
       nombre,
+      cedula,
       apellido,
       correo,
       telefono,
-      identificacion,
       entidad_id,
     });
 
@@ -141,10 +156,30 @@ const deleteCliente = async (req, res) => {
   }
 };
 
+const changeActive = async (req, res) => {
+  try {
+    const cliente = await Usuario.findById(req.params.id);
+    if (!usuario) {
+      return res.status(404).json({ message: "Cliente no encontrado" });
+    }
+
+    const active = !usuario.activo;
+    await Cliente.findByIdAndUpdate(req.params.id, { activo: active });
+
+    res.status(200).json({ message: "Estado de cliente actualizado" });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al actualizar estado de cliente",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   createCliente,
   getAllClientes,
   getClienteById,
   updateCliente,
   deleteCliente,
+  changeActive,
 };

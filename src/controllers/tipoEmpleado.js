@@ -1,24 +1,22 @@
-const TipoEmpleado = require("../models/tipoEmpleado");
+const TipoEmpleado = require("../models/tipo-empleado");
 
 exports.createTipoEmpleado = async (req, res) => {
   try {
-    const { nombre, precioxHora, empleado_id } = req.body;
+    const { nombre, horasFacturables_id, empleado_id } = req.body;
 
     const nuevoTipoEmpleado = new TipoEmpleado({
       nombre,
-      precioxHora,
+      horasFacturables_id,
       empleado_id,
     });
 
     await nuevoTipoEmpleado.save();
     res.status(201).json({ message: "Tipo de empleado creado exitosamente" });
   } catch (error) {
-    res
-      .status(400)
-      .json({
-        message: "Error al crear tipo de empleado",
-        error: error.message,
-      });
+    res.status(400).json({
+      message: "Error al crear tipo de empleado",
+      error: error.message,
+    });
   }
 };
 
@@ -73,12 +71,10 @@ exports.getTipoEmpleadoById = async (req, res) => {
       .status(200)
       .json({ message: "Tipo de empleado encontrado", tipoEmpleado });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Error al buscar tipo de empleado",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error al buscar tipo de empleado",
+      error: error.message,
+    });
   }
 };
 
@@ -132,19 +128,15 @@ exports.updateTipoEmpleado = async (req, res) => {
       }
     );
 
-    res
-      .status(200)
-      .json({
-        message: "Tipo de empleado actualizado con éxito",
-        tipoEmpleado,
-      });
+    res.status(200).json({
+      message: "Tipo de empleado actualizado con éxito",
+      tipoEmpleado,
+    });
   } catch (error) {
-    res
-      .status(400)
-      .json({
-        message: "Error al actualizar tipo de empleado",
-        error: error.message,
-      });
+    res.status(400).json({
+      message: "Error al actualizar tipo de empleado",
+      error: error.message,
+    });
   }
 };
 
@@ -158,11 +150,9 @@ exports.deleteTipoEmpleado = async (req, res) => {
     }
     res.status(200).json({ message: "Tipo de empleado eliminado con éxito" });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Error al eliminar tipo de empleado",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error al eliminar tipo de empleado",
+      error: error.message,
+    });
   }
 };

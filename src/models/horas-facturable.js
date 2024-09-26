@@ -1,11 +1,12 @@
 const mongoose = require("mongoose");
 
 const horasFacturablesSchema = new mongoose.Schema({
-  number_id: { type: Number, required: true },
-  id_proyecto: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Proyecto",
-    required: false,
+  precio: { type: Number, required: true },
+  moneda: {
+    type: String,
+    required: true,
+    enum: ["USD", "EUR", "CRC", "MXN"],
+    maxlength: 3,
   },
   tipoEmpleado_id: {
     type: mongoose.Schema.Types.ObjectId,
@@ -19,5 +20,3 @@ const HorasFacturables = mongoose.model(
   horasFacturablesSchema
 );
 module.exports = HorasFacturables;
-
-//cliente_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },

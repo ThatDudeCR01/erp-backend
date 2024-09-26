@@ -117,12 +117,10 @@ exports.updateMantenimiento = async (req, res) => {
 
     res.status(200).json({ message: "Mantenimiento actualizado con éxito" });
   } catch (error) {
-    res
-      .status(400)
-      .json({
-        message: "Error al actualizar mantenimiento",
-        error: error.message,
-      });
+    res.status(400).json({
+      message: "Error al actualizar mantenimiento",
+      error: error.message,
+    });
   }
 };
 
@@ -134,11 +132,9 @@ exports.deleteMantenimiento = async (req, res) => {
     }
     res.status(200).json({ message: "Mantenimiento eliminado con éxito" });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Error al eliminar mantenimiento",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error al eliminar mantenimiento",
+      error: error.message,
+    });
   }
 };

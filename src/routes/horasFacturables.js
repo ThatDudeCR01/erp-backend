@@ -1,32 +1,24 @@
 const express = require("express");
-const horasFacturables = require("../controllers/horas-facturable");
+const {
+  createHorasFacturables,
+  getAllHorasFacturables,
+  getHorasFacturablesById,
+  updateHorasFacturables,
+  deleteHorasFacturables,
+} = require("../controllers/horas-facturable");
 const router = express.Router();
-const { validationResult } = require("express-validator");
-const horasFacturablesValidacion = require("../validators/horasFacturables");
+const {
+  horasFacturablesValidacion,
+} = require("../validators/horasFacturables");
 
-router.get("/", horasFacturables.getAllHorasFacturables);
+router.post("/", horasFacturablesValidacion, createHorasFacturables);
 
-// Ruta para crear nuevas horas facturables, aplicando las validaciones
-router.post("/", horasFacturablesValidacion, (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  horasFacturables.createHorasFacturables(req, res, next);
-});
+router.get("/", getAllHorasFacturables);
 
-router.get("/:id", horasFacturables.getHorasFacturablesById);
+router.get("/:id", getHorasFacturablesById);
 
-// Actualizar horas facturables
-router.put("/:id", (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  horasFacturables.updateHorasFacturables(req, res, next);
-});
+router.put("/:id", updateHorasFacturables);
 
-// Eliminar horas facturables
-router.delete("/:id", horasFacturables.deleteHorasFacturables);
+router.delete("/:id", deleteHorasFacturables);
 
 module.exports = router;

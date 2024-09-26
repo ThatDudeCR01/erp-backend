@@ -20,6 +20,7 @@ const horasFacturables = require("./horasFacturables");
 const mantenimiento = require("./mantenimientos");
 const template = require("./templates");
 const tipoProducto = require("./tipoProductos");
+const tipoEmpleado = require("./tipoEmpleados");
 
 router.use("/auth", auth);
 
@@ -34,12 +35,13 @@ router.use("/proveedores", proveedor);
 router.use("/clientes", cliente);
 router.use("/productos", producto);
 router.use("/tipoProductos", tipoProducto);
+router.use("/tipoEmpleados", tipoEmpleado);
 router.use("/empresas", empresa);
 router.use("/proyectos", proyecto);
-// router.use("/horasFacturables", horasFacturables);
-// router.use("/mantenimientos", mantenimiento);
-// router.use("/solicitudes", solicitud);
-// router.use("/tareasMantenimientos", tareasManteniento);
-// router.use("/templates", template);
+router.use("/horasFacturables", horasFacturables);
+router.use("/mantenimientos", mantenimiento);
+router.use("/solicitudes", solicitud);
+router.use("/tareasMantenimientos", tareasManteniento);
+router.use("/templates", template);
 
 module.exports = router;
