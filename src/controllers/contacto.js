@@ -11,6 +11,14 @@ const createContacto = async (req, res) => {
     if (checkContacto) {
       return res.status(400).json({ message: "El correo ya está en uso" });
     }
+    const checkEntidad = await Contacto.findById({ entidad_id });
+    if (checkEntidad) {
+      return res
+        .status(400)
+        .json({
+          message: "El contacto ya se encuentra vinculado a una entidad",
+        });
+    }
 
     const nuevoContacto = new Contacto({
       nombre,
