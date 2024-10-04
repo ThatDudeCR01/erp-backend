@@ -1,6 +1,5 @@
 const Solicitud = require("../models/solicitudes");
 const handleValidationErrors = require("../config/validateResult");
-const { getUpdatedFields } = require("../utils/fieldUtils");
 const { obtenerFechaCostaRica } = require("../utils/obtenerFechaCostaRica");
 
 const createSolicitud = async (req, res) => {
@@ -97,42 +96,14 @@ const updateSolicitud = async (req, res) => {
     return;
   }
   try {
-    const {
-      nombre,
-      descripcion,
-      fechaResuelto,
-      estaAprobada,
-      empleadoAprueba_id,
-    } = req.body;
-    const campos = {
-      nombre,
-      fechaResuelto,
-      descripcion,
-      estaAprobada,
-      empleadoAprueba_id,
-    };
-
     const solicitudActual = await Solicitud.findById(req.params.id);
     if (!solicitudActual) {
       return res.status(404).json({ message: "Solicitud no encontrada" });
     }
 
-    const { updates, hasChanges, message } = getUpdatedFields(
-      campos,
-      solicitudActual
-    );
-
-    if (!hasChanges) {
-      return res.status(200).json({ message });
-    }
-
-    if (fechaResuelto) {
-      updates.fechaResuelto = obtenerFechaCostaRica(fechaResuelto);
-    }
-
     const solicitud = await Solicitud.findByIdAndUpdate(
       req.params.id,
-      { $set: updates },
+      { $set: req.body },
       { new: true, runValidators: true }
     );
 

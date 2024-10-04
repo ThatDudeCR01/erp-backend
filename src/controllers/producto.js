@@ -1,7 +1,5 @@
 const Producto = require("../models/producto");
-const Proveedor = require("../models/proveedor");
 const handleValidationErrors = require("../config/validateResult");
-const { getUpdatedFields } = require("../utils/fieldUtils");
 
 const createProducto = async (req, res) => {
   if (handleValidationErrors(req, res)) {
@@ -9,15 +7,6 @@ const createProducto = async (req, res) => {
   }
   try {
     const { nombre, precio, tipoProducto_id, proveedor_id } = req.body;
-
-    const proveedorExistente = await Proveedor.findById(proveedor_id);
-
-    if (!proveedorExistente) {
-      return res.status(404).json({
-        message:
-          "El proveedor proporcionada no se encontró en la base de datos",
-      });
-    }
 
     const nuevoProducto = new Producto({
       nombre,
@@ -41,13 +30,19 @@ const getAllProductos = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
     const filter = req.query.filter || "";
+    const proveedorId = req.query.id || null;
 
     const filterRegex = new RegExp(filter, "i");
 
     const searchCriteria = {
-      $or: [
-        { nombre: { $regex: filterRegex } },
-        ...(isNaN(filter) ? [] : [{ precio: Number(filter) }]),
+      $and: [
+        {
+          $or: [
+            { nombre: { $regex: filterRegex } },
+            ...(isNaN(filter) ? [] : [{ precio: Number(filter) }]),
+          ],
+        },
+        ...(proveedorId ? [{ proveedor_id: proveedorId }] : []),
       ],
     };
 
@@ -78,8 +73,7 @@ const getProductoById = async (req, res) => {
   try {
     const producto = await Producto.findById(req.params.id)
       .select("  nombre precio tipo proveedor_id -_id ")
-      .populate("proveedor_id")
-      .populate("tipoProducto_id");
+      .populate("proveedor_id");
     if (!producto) {
       return res.status(404).json({ message: "Producto no encontrado" });
     }
@@ -96,26 +90,14 @@ const updateProducto = async (req, res) => {
     return;
   }
   try {
-    const { nombre, precio, tipo } = req.body;
-    const campos = { nombre, precio, tipo };
-
     const productoActual = await Producto.findById(req.params.id);
     if (!productoActual) {
       return res.status(404).json({ message: "Producto no encontrado" });
     }
 
-    const { updates, hasChanges, message } = getUpdatedFields(
-      campos,
-      productoActual
-    );
-
-    if (!hasChanges) {
-      return res.status(200).json({ message });
-    }
-
-    const producto = await Producto.findByIdAndUpdate(
+    await Producto.findByIdAndUpdate(
       req.params.id,
-      { $set: updates },
+      { $set: req.body },
       { new: true, runValidators: true }
     );
 

@@ -14,7 +14,7 @@ const productoSchema = new mongoose.Schema({
   proveedor_id: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Proveedor",
+      ref: "Proveedores",
       required: true,
     },
   ],
