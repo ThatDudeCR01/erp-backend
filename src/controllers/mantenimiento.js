@@ -1,16 +1,43 @@
 const Mantenimiento = require("../models/mantenimiento");
+const Template = require("../models/template");
 
-exports.createMantenimiento = async (req, res) => {
+const createMantenimiento = async (req, res) => {
   try {
-    const { id_empresa, template_id } = req.body;
+    const { empresa_id, template_id } = req.body;
 
-    const nuevoMantenimiento = new Mantenimiento({
-      id_empresa,
-      template_id,
+    // Buscar el template por su ID y obtener las tareas asociadas
+    const template = await Template.findById(template_id).populate(
+      "tareasMantenimiento_id"
+    );
+    if (!template) {
+      return res.status(404).json({ message: "Template no encontrado" });
+    }
+
+    // Crear una copia de cada tarea asociada al template
+    const tareasCopia = template.tareasMantenimiento_id.map((tarea) => {
+      return {
+        nombre: tarea.nombre,
+        tipo: tarea.tipo,
+        descripcion: tarea.descripcion,
+        duracion: tarea.duracion,
+        template_id: tarea.template_id, // Mantén la referencia al template
+      };
     });
 
+    // Crear el nuevo mantenimiento con las copias de las tareas
+    const nuevoMantenimiento = new Mantenimiento({
+      empresa_id,
+      template_id,
+      tareas: tareasCopia, // Almacenar las tareas copiadas en el array de tareas
+    });
+
+    // Guardar el nuevo mantenimiento en la base de datos
     await nuevoMantenimiento.save();
-    res.status(201).json({ message: "Mantenimiento creado exitosamente" });
+
+    res.status(201).json({
+      message: "Mantenimiento creado con éxito",
+      mantenimiento: nuevoMantenimiento,
+    });
   } catch (error) {
     res
       .status(400)
@@ -18,7 +45,7 @@ exports.createMantenimiento = async (req, res) => {
   }
 };
 
-exports.getAllMantenimientos = async (req, res) => {
+const getAllMantenimientos = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -58,13 +85,13 @@ exports.getAllMantenimientos = async (req, res) => {
   }
 };
 
-exports.getMantenimientoById = async (req, res) => {
+const getMantenimientoById = async (req, res) => {
   try {
     const mantenimiento = await Mantenimiento.findById(req.params.id);
     if (!mantenimiento) {
       return res.status(404).json({ message: "Mantenimiento no encontrado" });
     }
-    res.status(200).json({ message: "Mantenimiento encontrado" });
+    res.status(200).json({ mantenimiento });
   } catch (error) {
     res
       .status(500)
@@ -72,43 +99,16 @@ exports.getMantenimientoById = async (req, res) => {
   }
 };
 
-exports.updateMantenimiento = async (req, res) => {
+const updateMantenimiento = async (req, res) => {
   try {
-    const { id_empresa, template_id } = req.body;
-
     const mantenimientoActual = await Mantenimiento.findById(req.params.id);
     if (!mantenimientoActual) {
       return res.status(404).json({ message: "Mantenimiento no encontrado" });
     }
 
-    const updates = {};
-    let isModified = false;
-
-    if (
-      id_empresa &&
-      id_empresa.toString() !== mantenimientoActual.id_empresa.toString()
-    ) {
-      updates.id_empresa = id_empresa;
-      isModified = true;
-    }
-
-    if (
-      template_id &&
-      template_id.toString() !== mantenimientoActual.template_id.toString()
-    ) {
-      updates.template_id = template_id;
-      isModified = true;
-    }
-
-    if (!isModified) {
-      return res.status(200).json({
-        message: "La información es la misma, no se realizaron cambios.",
-      });
-    }
-
-    const mantenimiento = await Mantenimiento.findByIdAndUpdate(
+    await Mantenimiento.findByIdAndUpdate(
       req.params.id,
-      { $set: updates },
+      { $set: req.body },
       {
         new: true,
         runValidators: true,
@@ -124,7 +124,7 @@ exports.updateMantenimiento = async (req, res) => {
   }
 };
 
-exports.deleteMantenimiento = async (req, res) => {
+const deleteMantenimiento = async (req, res) => {
   try {
     const mantenimiento = await Mantenimiento.findByIdAndDelete(req.params.id);
     if (!mantenimiento) {
@@ -137,4 +137,12 @@ exports.deleteMantenimiento = async (req, res) => {
       error: error.message,
     });
   }
+};
+
+module.exports = {
+  createMantenimiento,
+  getAllMantenimientos,
+  getMantenimientoById,
+  updateMantenimiento,
+  deleteMantenimiento,
 };

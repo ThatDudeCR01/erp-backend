@@ -1,32 +1,23 @@
 const express = require("express");
-const template = require("../controllers/template");
+const {
+  createTemplate,
+  getAllTemplates,
+  getTemplateById,
+  updateTemplate,
+  deleteTemplate,
+} = require("../controllers/template");
 const router = express.Router();
-const { validationResult } = require("express-validator");
-const templateValidacion = require("../validators/template");
 
-router.get("/", template.getAllTemplates);
+const { templateValidacion } = require("../validators/template");
 
-// Ruta para crear un nuevo template, aplicando las validaciones
-router.post("/", templateValidacion, (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  template.createTemplate(req, res, next);
-});
+router.post("/", templateValidacion, createTemplate);
 
-router.get("/:id", template.getTemplateById);
+router.get("/", getAllTemplates);
 
-// Actualizar template
-router.put("/:id", templateValidacion, (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  template.updateTemplate(req, res, next);
-});
+router.get("/:id", getTemplateById);
 
-// Eliminar template
-router.delete("/:id", template.deleteTemplate);
+router.patch("/:id", updateTemplate);
+
+router.delete("/:id", deleteTemplate);
 
 module.exports = router;

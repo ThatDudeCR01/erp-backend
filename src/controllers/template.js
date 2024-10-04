@@ -1,12 +1,16 @@
 const Template = require("../models/template");
+const handleValidationErrors = require("../config/validateResult");
 
-exports.createTemplate = async (req, res) => {
+const createTemplate = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
-    const { nombre, tareasMantenimiento } = req.body;
+    const { nombre, tareasMantenimiento_id } = req.body;
 
     const nuevoTemplate = new Template({
       nombre,
-      tareasMantenimiento,
+      tareasMantenimiento_id,
     });
 
     await nuevoTemplate.save();
@@ -18,7 +22,7 @@ exports.createTemplate = async (req, res) => {
   }
 };
 
-exports.getAllTemplates = async (req, res) => {
+const getAllTemplates = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -53,15 +57,14 @@ exports.getAllTemplates = async (req, res) => {
   }
 };
 
-exports.getTemplateById = async (req, res) => {
+const getTemplateById = async (req, res) => {
   try {
-    const template = await Template.findById(req.params.id).populate(
-      "tareasMantenimiento"
-    );
+    const template = await Template.findById(req.params.id);
+
     if (!template) {
       return res.status(404).json({ message: "Template no encontrado" });
     }
-    res.status(200).json({ message: "Template encontrado", template });
+    res.status(200).json({ template });
   } catch (error) {
     res
       .status(500)
@@ -69,50 +72,24 @@ exports.getTemplateById = async (req, res) => {
   }
 };
 
-exports.updateTemplate = async (req, res) => {
+const updateTemplate = async (req, res) => {
   try {
-    const { nombre, tareasMantenimiento } = req.body;
+    const template = await Template.findById(req.params.id);
 
-    const templateActual = await Template.findById(req.params.id);
-    if (!templateActual) {
+    if (!template) {
       return res.status(404).json({ message: "Template no encontrado" });
     }
 
-    const updates = {};
-    let isModified = false;
-
-    if (nombre && nombre !== templateActual.nombre) {
-      updates.nombre = nombre;
-      isModified = true;
-    }
-
-    if (
-      tareasMantenimiento &&
-      tareasMantenimiento.toString() !==
-        templateActual.tareasMantenimiento.toString()
-    ) {
-      updates.tareasMantenimiento = tareasMantenimiento;
-      isModified = true;
-    }
-
-    if (!isModified) {
-      return res.status(200).json({
-        message: "La información es la misma, no se realizaron cambios.",
-      });
-    }
-
-    const template = await Template.findByIdAndUpdate(
+    await Template.findByIdAndUpdate(
       req.params.id,
-      { $set: updates },
+      { $set: req.body },
       {
         new: true,
         runValidators: true,
       }
     );
 
-    res
-      .status(200)
-      .json({ message: "Template actualizado con éxito", template });
+    res.status(200).json({ template });
   } catch (error) {
     res
       .status(400)
@@ -120,7 +97,7 @@ exports.updateTemplate = async (req, res) => {
   }
 };
 
-exports.deleteTemplate = async (req, res) => {
+const deleteTemplate = async (req, res) => {
   try {
     const template = await Template.findByIdAndDelete(req.params.id);
     if (!template) {
@@ -132,4 +109,12 @@ exports.deleteTemplate = async (req, res) => {
       .status(500)
       .json({ message: "Error al eliminar template", error: error.message });
   }
+};
+
+module.exports = {
+  createTemplate,
+  getAllTemplates,
+  getTemplateById,
+  updateTemplate,
+  deleteTemplate,
 };
