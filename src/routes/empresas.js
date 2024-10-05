@@ -28,7 +28,7 @@ router.post(
 router.get("/", checkPermisos("Empresas/read"), getAllEmpresas);
 
 router.get(
-  "/empresas-por-cliente/:id",
+  "/empresas-por-cliente/",
   checkPermisos("Empresas/read"),
   validarClienteId,
   getEmpresaByClienteId
