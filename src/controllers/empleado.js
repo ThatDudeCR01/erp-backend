@@ -1,6 +1,5 @@
 const Empleado = require("../models/empleado");
 const handleValidationErrors = require("../config/validateResult");
-const { getUpdatedFields } = require("../utils/fieldUtils");
 
 const createEmpleado = async (req, res) => {
   if (handleValidationErrors(req, res)) {
@@ -16,6 +15,13 @@ const createEmpleado = async (req, res) => {
       entidad_id,
       identificacion,
     } = req.body;
+
+    const empleadoExistente = await Empleado.findOne({ entidad_id });
+    if (empleadoExistente) {
+      return res.status(400).json({
+        message: "Ya existe un empleado con la misma entidad_id.",
+      });
+    }
 
     const nuevoEmpleado = new Empleado({
       nombre,
@@ -99,26 +105,13 @@ const updateEmpleado = async (req, res) => {
     return;
   }
   try {
-    const { nombre, apellido, puesto, salario } = req.body;
-    const campos = { nombre, apellido, puesto, salario };
-
     const empleadoActual = await Empleado.findById(req.params.id);
     if (!empleadoActual) {
       return res.status(404).json({ message: "Empleado no encontrado" });
     }
-
-    const { updates, hasChanges, message } = getUpdatedFields(
-      campos,
-      empleadoActual
-    );
-
-    if (!hasChanges) {
-      return res.status(200).json({ message });
-    }
-
     await Empleado.findByIdAndUpdate(
       req.params.id,
-      { $set: updates },
+      { $set: req.body },
       { new: true, runValidators: true }
     );
     res.status(200).json({ message: "Empleado actualizado con éxito" });
