@@ -1,4 +1,5 @@
 const Producto = require("../models/producto");
+const Proveedor = require("../models/proveedor");
 const handleValidationErrors = require("../config/validateResult");
 
 const createProducto = async (req, res) => {
@@ -7,6 +8,14 @@ const createProducto = async (req, res) => {
   }
   try {
     const { nombre, precio, tipoProducto_id, proveedor_id } = req.body;
+
+    const proveedorExistente = await Proveedor.findById(proveedor_id);
+    if (!proveedorExistente) {
+      return res.status(404).json({
+        message:
+          "El proveedor proporcionada no se encontró en la base de datos",
+      });
+    }
 
     const nuevoProducto = new Producto({
       nombre,

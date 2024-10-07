@@ -1,4 +1,5 @@
 const Proveedor = require("../models/proveedor");
+const Entidad = require("../models/entidad");
 const handleValidationErrors = require("../config/validateResult");
 
 const createProveedor = async (req, res) => {
@@ -7,6 +8,13 @@ const createProveedor = async (req, res) => {
   }
   try {
     const { nombre, correo, telefono, cedula, entidad_id } = req.body;
+
+    const entidadExistente = await Entidad.findById(entidad_id);
+    if (!entidadExistente) {
+      return res.status(404).json({
+        message: "La entidad proporcionada no se encontró en la base de datos",
+      });
+    }
 
     const nuevoProveedor = new Proveedor({
       nombre,
