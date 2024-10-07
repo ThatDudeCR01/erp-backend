@@ -28,17 +28,17 @@ router.get("/", checkPermisos("Clientes/read"), getAllClientes);
 router.get("/:id", checkPermisos("Clientes/read"), getClienteById);
 
 router.patch(
-  "/:id",
-  checkPermisos("Clientes/update"),
-  actualizarClienteValidacion,
-  updateCliente
-);
-
-router.patch(
   "/active/:id",
   clienteIdParamsValidacion,
   checkPermisos("Clientes/update"),
   changeActive
+);
+
+router.patch(
+  "/:id",
+  checkPermisos("Clientes/update"),
+  actualizarClienteValidacion,
+  updateCliente
 );
 
 router.delete(
