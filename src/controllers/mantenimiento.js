@@ -1,19 +1,27 @@
 const Mantenimiento = require("../models/mantenimiento");
 const Template = require("../models/template");
+const Empresa = require("../models/empresa");
 
 const createMantenimiento = async (req, res) => {
   try {
     const { empresa_id, template_id } = req.body;
 
-    // Buscar el template por su ID y obtener las tareas asociadas
+    const empresaExistente = await Empresa.findById(empresa_id);
+    if (!empresaExistente) {
+      return res.status(404).json({
+        message: "La empresa proporcionada no se encontró en la base de datos",
+      });
+    }
+
     const template = await Template.findById(template_id).populate(
       "tareasMantenimiento_id"
     );
     if (!template) {
-      return res.status(404).json({ message: "Template no encontrado" });
+      return res
+        .status(404)
+        .json({ message: "Template no encontrado en la base de datos" });
     }
 
-    // Crear una copia de cada tarea asociada al template
     const tareasCopia = template.tareasMantenimiento_id.map((tarea) => {
       return {
         nombre: tarea.nombre,
@@ -24,14 +32,12 @@ const createMantenimiento = async (req, res) => {
       };
     });
 
-    // Crear el nuevo mantenimiento con las copias de las tareas
     const nuevoMantenimiento = new Mantenimiento({
       empresa_id,
       template_id,
       tareas: tareasCopia, // Almacenar las tareas copiadas en el array de tareas
     });
 
-    // Guardar el nuevo mantenimiento en la base de datos
     await nuevoMantenimiento.save();
 
     res.status(201).json({
