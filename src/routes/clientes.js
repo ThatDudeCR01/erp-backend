@@ -5,12 +5,14 @@ const {
   getClienteById,
   updateCliente,
   deleteCliente,
+  changeActive,
 } = require("../controllers/cliente");
 const router = express.Router();
 const {
   clienteValidacion,
   actualizarClienteValidacion,
   clienteIdValidacion,
+  clienteIdParamsValidacion,
 } = require("../validators/cliente");
 const { checkPermisos } = require("../middleware/auth");
 
@@ -23,14 +25,14 @@ router.post(
 
 router.get("/", checkPermisos("Clientes/read"), getAllClientes);
 
+router.get("/:id", checkPermisos("Clientes/read"), getClienteById);
+
 router.patch(
   "/active/:id",
+  clienteIdParamsValidacion,
   checkPermisos("Clientes/update"),
-  actualizarClienteValidacion,
-  updateCliente
+  changeActive
 );
-
-router.get("/:id", checkPermisos("Clientes/read"), getClienteById);
 
 router.patch(
   "/:id",

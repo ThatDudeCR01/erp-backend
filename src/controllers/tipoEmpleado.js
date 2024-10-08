@@ -1,13 +1,12 @@
 const TipoEmpleado = require("../models/tipo-empleado");
 
-exports.createTipoEmpleado = async (req, res) => {
+const createTipoEmpleado = async (req, res) => {
   try {
-    const { nombre, horasFacturables_id, empleado_id } = req.body;
+    const { nombre, horasFacturables_id } = req.body;
 
     const nuevoTipoEmpleado = new TipoEmpleado({
       nombre,
       horasFacturables_id,
-      empleado_id,
     });
 
     await nuevoTipoEmpleado.save();
@@ -20,7 +19,7 @@ exports.createTipoEmpleado = async (req, res) => {
   }
 };
 
-exports.getAllTiposEmpleado = async (req, res) => {
+const getAllTiposEmpleado = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -57,7 +56,7 @@ exports.getAllTiposEmpleado = async (req, res) => {
   }
 };
 
-exports.getTipoEmpleadoById = async (req, res) => {
+const getTipoEmpleadoById = async (req, res) => {
   try {
     const tipoEmpleado = await TipoEmpleado.findById(req.params.id).populate(
       "empleado_id"
@@ -78,10 +77,8 @@ exports.getTipoEmpleadoById = async (req, res) => {
   }
 };
 
-exports.updateTipoEmpleado = async (req, res) => {
+const updateTipoEmpleado = async (req, res) => {
   try {
-    const { nombre, precioxHora, empleado_id } = req.body;
-
     const tipoEmpleadoActual = await TipoEmpleado.findById(req.params.id);
     if (!tipoEmpleadoActual) {
       return res
@@ -89,39 +86,9 @@ exports.updateTipoEmpleado = async (req, res) => {
         .json({ message: "Tipo de empleado no encontrado" });
     }
 
-    const updates = {};
-    let isModified = false;
-
-    if (nombre && nombre !== tipoEmpleadoActual.nombre) {
-      updates.nombre = nombre;
-      isModified = true;
-    }
-
-    if (
-      typeof precioxHora !== "undefined" &&
-      precioxHora !== tipoEmpleadoActual.precioxHora
-    ) {
-      updates.precioxHora = precioxHora;
-      isModified = true;
-    }
-
-    if (
-      empleado_id &&
-      empleado_id.toString() !== tipoEmpleadoActual.empleado_id.toString()
-    ) {
-      updates.empleado_id = empleado_id;
-      isModified = true;
-    }
-
-    if (!isModified) {
-      return res.status(200).json({
-        message: "La información es la misma, no se realizaron cambios.",
-      });
-    }
-
     const tipoEmpleado = await TipoEmpleado.findByIdAndUpdate(
       req.params.id,
-      { $set: updates },
+      { $set: req.body },
       {
         new: true,
         runValidators: true,
@@ -140,7 +107,7 @@ exports.updateTipoEmpleado = async (req, res) => {
   }
 };
 
-exports.deleteTipoEmpleado = async (req, res) => {
+const deleteTipoEmpleado = async (req, res) => {
   try {
     const tipoEmpleado = await TipoEmpleado.findByIdAndDelete(req.params.id);
     if (!tipoEmpleado) {
@@ -155,4 +122,12 @@ exports.deleteTipoEmpleado = async (req, res) => {
       error: error.message,
     });
   }
+};
+
+module.exports = {
+  createTipoEmpleado,
+  getAllTiposEmpleado,
+  getTipoEmpleadoById,
+  updateTipoEmpleado,
+  deleteTipoEmpleado,
 };

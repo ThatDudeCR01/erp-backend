@@ -1,7 +1,6 @@
 const Proveedor = require("../models/proveedor");
 const Entidad = require("../models/entidad");
 const handleValidationErrors = require("../config/validateResult");
-const { getUpdatedFields } = require("../utils/fieldUtils");
 
 const createProveedor = async (req, res) => {
   if (handleValidationErrors(req, res)) {
@@ -10,7 +9,7 @@ const createProveedor = async (req, res) => {
   try {
     const { nombre, correo, telefono, cedula, entidad_id } = req.body;
 
-    const entidadExistente = await Entidad.findById(ObjectIdentidad_id);
+    const entidadExistente = await Entidad.findById(entidad_id);
     if (!entidadExistente) {
       return res.status(404).json({
         message: "La entidad proporcionada no se encontró en la base de datos",
@@ -97,26 +96,14 @@ const updateProveedor = async (req, res) => {
     return;
   }
   try {
-    const { nombre, telefono } = req.body;
-    const campos = { nombre, telefono };
-
     const proveedorActual = await Proveedor.findById(req.params.id);
     if (!proveedorActual) {
       return res.status(404).json({ message: "Proveedor no encontrado" });
     }
 
-    const { updates, hasChanges, message } = getUpdatedFields(
-      campos,
-      proveedorActual
-    );
-
-    if (!hasChanges) {
-      return res.status(200).json({ message });
-    }
-
-    const proveedor = await Proveedor.findByIdAndUpdate(
+    await Proveedor.findByIdAndUpdate(
       req.params.id,
-      { $set: updates },
+      { $set: req.body },
       { new: true, runValidators: true }
     );
     res.status(200).json({ message: "Proveedor actualizado con éxito" });

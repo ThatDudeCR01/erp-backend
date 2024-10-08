@@ -1,4 +1,4 @@
-const { body } = require("express-validator");
+const { body, param } = require("express-validator");
 
 const validarNombre = body("nombre")
   .notEmpty()
@@ -57,6 +57,12 @@ const clienteIdValidacion = body("cliente_id")
   .isMongoId()
   .withMessage("Invalid role ID. Must be a valid MongoDB ObjectId.");
 
+const clienteIdParamsValidacion = param("id")
+  .notEmpty()
+  .withMessage("Debe proporcionar un ID de cliente en la URL")
+  .isMongoId()
+  .withMessage("Debe ser un ObjectId válido en la URL");
+
 const clienteValidacion = [
   validarNombre,
   validarApellido,
@@ -76,4 +82,5 @@ module.exports = {
   clienteValidacion,
   actualizarClienteValidacion,
   clienteIdValidacion,
+  clienteIdParamsValidacion,
 };

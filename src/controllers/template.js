@@ -2,9 +2,11 @@ const Template = require("../models/template");
 const handleValidationErrors = require("../config/validateResult");
 
 const createTemplate = async (req, res) => {
+
   if (handleValidationErrors(req, res)) {
     return;
   }
+
   try {
     const { nombre, tareasMantenimiento_id } = req.body;
 

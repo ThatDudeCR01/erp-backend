@@ -7,11 +7,6 @@ const tipoEmpleadoSchema = new mongoose.Schema({
     ref: "HorasFacturables",
     required: true,
   },
-  empleado_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Empleado",
-    required: true,
-  },
 });
 
 const TipoEmpleado = mongoose.model("TipoEmpleados", tipoEmpleadoSchema);

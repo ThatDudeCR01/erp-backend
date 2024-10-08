@@ -29,9 +29,6 @@ const createCliente = async (req, res) => {
           errorMessage =
             "Ya existe un cliente asociado a esta entidad. No puede crear otro cliente con el mismo entidad_id.";
           break;
-
-        default:
-          break;
       }
 
       if (errorMessage) {
@@ -157,14 +154,19 @@ const deleteCliente = async (req, res) => {
 };
 
 const changeActive = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
-    const cliente = await Usuario.findById(req.params.id);
-    if (!usuario) {
+    const cliente = await Cliente.findById(req.params.id);
+    if (!cliente) {
       return res.status(404).json({ message: "Cliente no encontrado" });
     }
 
-    const active = !usuario.activo;
-    await Cliente.findByIdAndUpdate(req.params.id, { activo: active });
+    const nuevoEstado = !cliente.estaActivo;
+
+    cliente.estaActivo = nuevoEstado;
+    await cliente.save();
 
     res.status(200).json({ message: "Estado de cliente actualizado" });
   } catch (error) {
