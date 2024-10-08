@@ -1,6 +1,5 @@
 const Proyecto = require("../models/proyecto");
 const handleValidationErrors = require("../config/validateResult");
-const { getUpdatedFields } = require("../utils/fieldUtils");
 
 const createProyecto = async (req, res) => {
   if (handleValidationErrors(req, res)) {
@@ -92,41 +91,9 @@ const updateProyecto = async (req, res) => {
       return res.status(404).json({ message: "Proyecto no encontrado" });
     }
 
-    const updates = {};
-    let isModified = false;
-
-    if (nombre && nombre !== proyectoActual.nombre) {
-      updates.nombre = nombre;
-      isModified = true;
-    }
-
-    if (duracion && duracion !== proyectoActual.duracion) {
-      updates.duracion = duracion;
-      isModified = true;
-    }
-
-    if (descripcion && descripcion !== proyectoActual.descripcion) {
-      updates.descripcion = descripcion;
-      isModified = true;
-    }
-
-    if (
-      empresa_id &&
-      empresa_id.toString() !== proyectoActual.empresa_id.toString()
-    ) {
-      updates.empresa_id = empresa_id;
-      isModified = true;
-    }
-
-    if (!isModified) {
-      return res.status(200).json({
-        message: "La información es la misma, no se realizaron cambios.",
-      });
-    }
-
-    const proyecto = await Proyecto.findByIdAndUpdate(
+    await Proyecto.findByIdAndUpdate(
       req.params.id,
-      { $set: updates },
+      { $set: req.body },
       {
         new: true,
         runValidators: true,

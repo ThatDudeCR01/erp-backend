@@ -1,14 +1,24 @@
 const TareaMantenimiento = require("../models/tarea-mantenimiento");
+const Template = require("../models/template");
 
 exports.createTareaMantenimiento = async (req, res) => {
   try {
-    const { nombre, tipo, descripcion } = req.body;
+    const { nombre, tipo, descripcion, duracion, template_id } = req.body;
 
     const nuevaTareaMantenimiento = new TareaMantenimiento({
       nombre,
       tipo,
       descripcion,
+      duracion,
+      template_id,
     });
+
+    const templateExistente = await Template.findById(template_id);
+    if (!templateExistente) {
+      return res.status(404).json({
+        message: "El template proporcionado no se encontró en la base de datos",
+      });
+    }
 
     await nuevaTareaMantenimiento.save();
     res
