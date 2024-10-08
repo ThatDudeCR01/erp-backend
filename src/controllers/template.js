@@ -1,6 +1,6 @@
 const Template = require("../models/template");
 
-exports.createTemplate = async (req, res) => {
+const createTemplate = async (req, res) => {
   try {
     const { nombre, tareasMantenimiento } = req.body;
 
@@ -18,7 +18,7 @@ exports.createTemplate = async (req, res) => {
   }
 };
 
-exports.getAllTemplates = async (req, res) => {
+const getAllTemplates = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -53,7 +53,7 @@ exports.getAllTemplates = async (req, res) => {
   }
 };
 
-exports.getTemplateById = async (req, res) => {
+const getTemplateById = async (req, res) => {
   try {
     const template = await Template.findById(req.params.id).populate(
       "tareasMantenimiento"
@@ -69,7 +69,7 @@ exports.getTemplateById = async (req, res) => {
   }
 };
 
-exports.updateTemplate = async (req, res) => {
+const updateTemplate = async (req, res) => {
   try {
     const { nombre, tareasMantenimiento } = req.body;
 
@@ -120,7 +120,7 @@ exports.updateTemplate = async (req, res) => {
   }
 };
 
-exports.deleteTemplate = async (req, res) => {
+const deleteTemplate = async (req, res) => {
   try {
     const template = await Template.findByIdAndDelete(req.params.id);
     if (!template) {
@@ -132,4 +132,12 @@ exports.deleteTemplate = async (req, res) => {
       .status(500)
       .json({ message: "Error al eliminar template", error: error.message });
   }
+};
+
+module.exports = {
+  createTemplate,
+  getAllTemplates,
+  getTemplateById,
+  updateTemplate,
+  deleteTemplate,
 };

@@ -1,6 +1,5 @@
 const { body } = require("express-validator");
-const mongoose = require("mongoose");
-const Cliente = require("../models/cliente");
+const { param } = require("express-validator");
 
 const validarNombre = body("nombre")
   .notEmpty()
@@ -31,19 +30,14 @@ const validarTieneMantenimiento = body("tieneMantenimiento")
 const validarClienteId = body("cliente_id")
   .notEmpty()
   .withMessage("Debe proporcionar un ID de cliente")
-  .custom(async (value) => {
-    if (!mongoose.Types.ObjectId.isValid(value)) {
-      throw new Error("El ID del cliente no es válido");
-    }
+  .isMongoId()
+  .withMessage("Debe proporcionar un ID válido de MongoDB");
 
-    // Verifica si el cliente existe en la base de datos
-    const clienteExistente = await Cliente.findById(value);
-    if (!clienteExistente) {
-      throw new Error("El cliente no se encontró en la base de datos");
-    }
-
-    return true;
-  });
+const validarClienteIdParams = param("id")
+  .notEmpty()
+  .withMessage("Debe proporcionar un ID de cliente")
+  .isMongoId()
+  .withMessage("Debe proporcionar un ID válido de MongoDB");
 
 const empresaValidacion = [
   validarNombre,
@@ -57,5 +51,5 @@ const actualizarEmpresaValidacion = [validarNombre];
 module.exports = {
   empresaValidacion,
   actualizarEmpresaValidacion,
-  validarClienteId,
+  validarClienteIdParams,
 };

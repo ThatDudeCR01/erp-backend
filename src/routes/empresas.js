@@ -13,7 +13,7 @@ const router = express.Router();
 const {
   empresaValidacion,
   actualizarEmpresaValidacion,
-  validarClienteId,
+  validarClienteIdParams,
 } = require("../validators/empresa");
 
 const { checkPermisos } = require("../middleware/auth");
@@ -30,7 +30,7 @@ router.get("/", checkPermisos("Empresas/read"), getAllEmpresas);
 router.get(
   "/empresas-por-cliente/:id",
   checkPermisos("Empresas/read"),
-  validarClienteId,
+  validarClienteIdParams,
   getEmpresaByClienteId
 );
 
