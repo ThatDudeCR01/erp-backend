@@ -7,7 +7,6 @@ const {
   deleteProveedor,
 } = require("../controllers/proveedor");
 const router = express.Router();
-const { validationResult } = require("express-validator");
 const {
   proveedorValidacion,
   actualizarProveedorValidacion,
