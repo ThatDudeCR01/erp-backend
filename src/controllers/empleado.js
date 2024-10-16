@@ -13,7 +13,8 @@ const createEmpleado = async (req, res) => {
       telefono,
       salario,
       entidad_id,
-      identificacion,
+      cedula,
+      tipo_empleado_id,
     } = req.body;
 
     const empleadoExistente = await Empleado.findOne({ entidad_id });
@@ -23,17 +24,17 @@ const createEmpleado = async (req, res) => {
       });
     }
 
-    const nuevoEmpleado = new Empleado({
+    await Empleado({
       nombre,
       apellido,
       correo,
       telefono,
       salario,
-      identificacion,
+      cedula,
       entidad_id,
-    });
+      tipo_empleado_id,
+    }).save();
 
-    await nuevoEmpleado.save();
     res.status(201).json({ message: "Empleado creado exitosamente" });
   } catch (error) {
     res
@@ -87,7 +88,7 @@ const getAllEmpleados = async (req, res) => {
 const getEmpleadoById = async (req, res) => {
   try {
     const empleado = await Empleado.findById(req.params.id).select(
-      "nombre apellido telefono puesto -_id"
+      " -salario -_id"
     );
     if (!empleado) {
       return res.status(404).json({ message: "Empleado no encontrado" });
@@ -105,13 +106,14 @@ const updateEmpleado = async (req, res) => {
     return;
   }
   try {
+    const { nombre, apellido, puesto, salario } = req.body;
     const empleadoActual = await Empleado.findById(req.params.id);
     if (!empleadoActual) {
       return res.status(404).json({ message: "Empleado no encontrado" });
     }
     await Empleado.findByIdAndUpdate(
       req.params.id,
-      { $set: req.body },
+      { $set: { nombre, apellido, puesto, salario } },
       { new: true, runValidators: true }
     );
     res.status(200).json({ message: "Empleado actualizado con éxito" });
