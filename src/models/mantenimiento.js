@@ -11,8 +11,14 @@ const mantenimientoSchema = new mongoose.Schema({
     ref: "Template",
     required: true,
   },
+  estado: { type: String, default: "pendiente" },
   tareas: [
     {
+      tareaMantenimiento_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "TareaMantenimiento",
+        required: true,
+      },
       nombre: { type: String, required: true },
       tipo: { type: String, required: true },
       descripcion: { type: String, required: true },

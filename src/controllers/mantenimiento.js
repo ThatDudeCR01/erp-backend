@@ -4,7 +4,7 @@ const Empresa = require("../models/empresa");
 
 const createMantenimiento = async (req, res) => {
   try {
-    const { empresa_id, template_id } = req.body;
+    const { empresa_id, template_id, estado } = req.body;
 
     const empresaExistente = await Empresa.findById(empresa_id);
     if (!empresaExistente) {
@@ -16,6 +16,7 @@ const createMantenimiento = async (req, res) => {
     const template = await Template.findById(template_id).populate(
       "tareasMantenimiento_id"
     );
+
     if (!template) {
       return res
         .status(404)
@@ -24,18 +25,19 @@ const createMantenimiento = async (req, res) => {
 
     const tareasCopia = template.tareasMantenimiento_id.map((tarea) => {
       return {
+        tareaMantenimiento_id: tarea._id.toString(),
         nombre: tarea.nombre,
         tipo: tarea.tipo,
         descripcion: tarea.descripcion,
         duracion: tarea.duracion,
-        template_id: tarea.template_id, // Mantén la referencia al template
       };
     });
 
     const nuevoMantenimiento = new Mantenimiento({
       empresa_id,
       template_id,
-      tareas: tareasCopia, // Almacenar las tareas copiadas en el array de tareas
+      estado,
+      tareas: tareasCopia,
     });
 
     await nuevoMantenimiento.save();
@@ -60,11 +62,8 @@ const getAllMantenimientos = async (req, res) => {
 
     const filterRegex = new RegExp(filter, "i");
 
-    const searchCriteria = {
-      $or: [
-        { id_empresa: { $regex: filterRegex } },
-        { template_id: { $regex: filterRegex } },
-      ],
+    let searchCriteria = {
+      $or: [{ estado: { $regex: filterRegex } }],
     };
 
     const mantenimientos = await Mantenimiento.find(searchCriteria)
@@ -107,6 +106,7 @@ const getMantenimientoById = async (req, res) => {
 
 const updateMantenimiento = async (req, res) => {
   try {
+    const estado = req.body;
     const mantenimientoActual = await Mantenimiento.findById(req.params.id);
     if (!mantenimientoActual) {
       return res.status(404).json({ message: "Mantenimiento no encontrado" });
@@ -114,7 +114,7 @@ const updateMantenimiento = async (req, res) => {
 
     await Mantenimiento.findByIdAndUpdate(
       req.params.id,
-      { $set: req.body },
+      { $set: estado },
       {
         new: true,
         runValidators: true,
