@@ -1,5 +1,6 @@
 const Producto = require("../models/producto");
 const Proveedor = require("../models/proveedor");
+const TipoProducto = require("../models/tipo-producto");
 const handleValidationErrors = require("../config/validateResult");
 
 const createProducto = async (req, res) => {
@@ -7,7 +8,16 @@ const createProducto = async (req, res) => {
     return;
   }
   try {
-    const { nombre, precio, tipoProducto_id, proveedor_id } = req.body;
+    const {
+      nombre,
+      precio,
+      descripcion,
+      cantidad,
+      punto_reorden,
+      es_servivcio,
+      tipoProducto_id,
+      proveedor_id,
+    } = req.body;
 
     const proveedorExistente = await Proveedor.findById(proveedor_id);
     if (!proveedorExistente) {
@@ -17,14 +27,25 @@ const createProducto = async (req, res) => {
       });
     }
 
-    const nuevoProducto = new Producto({
+    const tipoProductoExistente = await TipoProducto.findById(tipoProducto_id);
+    if (!tipoProductoExistente) {
+      return res.status(404).json({
+        message:
+          "El tipo de producto proporcionada no se encontró en la base de datos",
+      });
+    }
+
+    await Producto({
       nombre,
       precio,
+      descripcion,
+      cantidad,
+      punto_reorden,
+      es_servivcio,
       tipoProducto_id,
       proveedor_id,
-    });
+    }).save();
 
-    await nuevoProducto.save();
     res.status(201).json({ message: "Producto creado exitosamente" });
   } catch (error) {
     res
@@ -56,7 +77,7 @@ const getAllProductos = async (req, res) => {
     };
 
     const productos = await Producto.find(searchCriteria)
-      .select("nombre precio tipo")
+      .select("nombre precio cantidad es_servicio punto_reorden tipo")
       .skip(skip)
       .limit(limit)
       .exec();
@@ -80,9 +101,8 @@ const getAllProductos = async (req, res) => {
 
 const getProductoById = async (req, res) => {
   try {
-    const producto = await Producto.findById(req.params.id)
-      .select("  nombre precio tipo proveedor_id -_id ")
-      .populate("proveedor_id");
+    const producto = await Producto.findById(req.params.id).select("-_id ");
+
     if (!producto) {
       return res.status(404).json({ message: "Producto no encontrado" });
     }
@@ -99,6 +119,14 @@ const updateProducto = async (req, res) => {
     return;
   }
   try {
+    const {
+      nombre,
+      precio,
+      descripcion,
+      cantidad,
+      punto_reorden,
+      es_servicio,
+    } = req.body;
     const productoActual = await Producto.findById(req.params.id);
     if (!productoActual) {
       return res.status(404).json({ message: "Producto no encontrado" });
@@ -106,7 +134,16 @@ const updateProducto = async (req, res) => {
 
     await Producto.findByIdAndUpdate(
       req.params.id,
-      { $set: req.body },
+      {
+        $set: {
+          nombre,
+          precio,
+          descripcion,
+          cantidad,
+          punto_reorden,
+          es_servicio,
+        },
+      },
       { new: true, runValidators: true }
     );
 
