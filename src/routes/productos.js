@@ -8,7 +8,7 @@ const {
 } = require("../controllers/producto");
 
 const router = express.Router();
-const { validationResult } = require("express-validator");
+
 const {
   productoValidacion,
   actualizarProductoValidacion,

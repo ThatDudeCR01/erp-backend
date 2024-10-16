@@ -1,9 +1,5 @@
 const { body } = require("express-validator");
-const mongoose = require("mongoose");
-const Proveedor = require("../models/proveedor");
-const TipoProducto = require("../models/tipo-producto");
 
-// Validación para el campo nombre
 const validarNombre = body("nombre")
   .notEmpty()
   .withMessage("El nombre es requerido")
@@ -14,7 +10,6 @@ const validarNombre = body("nombre")
   .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s]+$/)
   .withMessage("El nombre solo puede contener letras, números y espacios");
 
-// Validación para el campo precio
 const validarPrecio = body("precio")
   .notEmpty()
   .withMessage("El precio es requerido")
@@ -23,56 +18,65 @@ const validarPrecio = body("precio")
   .isNumeric()
   .withMessage("El precio solo debe contener números");
 
+const validarDescripcion = body("descripcion")
+  .notEmpty()
+  .withMessage("La descripción es requerida")
+  .trim()
+  .escape()
+  .isLength({ min: 10, max: 500 })
+  .withMessage("La descripción debe tener entre 10 y 500 caracteres")
+  .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s]+$/)
+  .withMessage("El nombre solo puede contener letras, números y espacios");
+
+const validarCantidad = body("cantidad")
+  .notEmpty()
+  .withMessage("La cantidad es requerida")
+  .isInt({ min: 0 })
+  .withMessage("La cantidad debe ser un número entero mayor o igual a 0");
+
+const validarPuntoReorden = body("punto_reorden")
+  .notEmpty()
+  .withMessage("El punto de reorden es requerido")
+  .isInt({ min: 0 })
+  .withMessage(
+    "El punto de reorden debe ser un número entero mayor o igual a 0"
+  );
+
+const validarEsServicio = body("es_servicio")
+  .isBoolean()
+  .withMessage("El valor debe ser verdadero o falso");
+
 const validarTipoProductoId = body("tipoProducto_id")
   .notEmpty()
-  .withMessage("Debe proporcionar un ID de tipo de producto")
-  .custom(async (value) => {
-    // Verifica si el ID es un ObjectId válido de MongoDB
-    if (!mongoose.Types.ObjectId.isValid(value)) {
-      throw new Error("El ID del tipo de producto no es válido");
-    }
+  .withMessage("El ID del template es requerido")
+  .isMongoId()
+  .withMessage("Debe ser un ID de MongoDB válido");
 
-    // Verifica si el proveedor existe en la base de datos
-    const proveedorExistente = await TipoProducto.findById(value);
-    if (!proveedorExistente) {
-      throw new Error("El tipo de producto no se encontró en la base de datos");
-    }
-
-    return true;
-  });
-
-// Validación para el campo proveedor_id
 const validarProveedorId = body("proveedor_id")
   .notEmpty()
-  .withMessage("Debe proporcionar un ID de proveedor")
-  .custom(async (value) => {
-    // Verifica si el ID es un ObjectId válido de MongoDB
-    if (!mongoose.Types.ObjectId.isValid(value)) {
-      throw new Error("El ID del proveedor no es válido");
-    }
+  .withMessage("El ID del template es requerido")
+  .isMongoId()
+  .withMessage("Debe ser un ID de MongoDB válido");
 
-    // Verifica si el proveedor existe en la base de datos
-    const proveedorExistente = await Proveedor.findById(value);
-    if (!proveedorExistente) {
-      throw new Error("El proveedor no se encontró en la base de datos");
-    }
-
-    return true;
-  });
-
-module.exports = {
-  validarProveedorId,
-};
-// Agrupación de validaciones para la creación de un producto
 const productoValidacion = [
   validarNombre,
   validarPrecio,
-
+  validarCantidad,
+  validarDescripcion,
+  validarPuntoReorden,
+  validarEsServicio,
   validarTipoProductoId,
   validarProveedorId,
 ];
 
-const actualizarProductoValidacion = [validarNombre, validarPrecio];
+const actualizarProductoValidacion = [
+  validarNombre,
+  validarPrecio,
+  validarCantidad,
+  validarPuntoReorden,
+  validarDescripcion,
+  validarEsServicio,
+];
 
 module.exports = {
   productoValidacion,
