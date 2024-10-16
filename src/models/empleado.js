@@ -13,13 +13,11 @@ const empleadoSchema = new mongoose.Schema({
     ref: "Entidad",
     required: true,
   },
-  tipo_empleado_id: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "TipoEmpelado",
-      required: true,
-    },
-  ],
+  tipo_empleado_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "TipoEmpelado",
+    required: true,
+  },
 });
 
 const Empleado = mongoose.model("Empleados", empleadoSchema);

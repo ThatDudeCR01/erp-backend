@@ -1,26 +1,30 @@
 const TareaMantenimiento = require("../models/tarea-mantenimiento");
 const Template = require("../models/template");
+const handleValidationErrors = require("../config/validateResult");
+const { obtenerFechaCostaRica } = require("../utils/obtenerFechaCostaRica");
 
-exports.createTareaMantenimiento = async (req, res) => {
+const createTareaMantenimiento = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
-    const { nombre, tipo, descripcion, duracion, template_id } = req.body;
-
-    const nuevaTareaMantenimiento = new TareaMantenimiento({
-      nombre,
-      tipo,
-      descripcion,
-      duracion,
-      template_id,
-    });
-
+    const { nombre, tipo, descripcion, duracion, fecha_cobro, template_id } =
+      req.body;
     const templateExistente = await Template.findById(template_id);
     if (!templateExistente) {
       return res.status(404).json({
         message: "El template proporcionado no se encontró en la base de datos",
       });
     }
+    await TareaMantenimiento({
+      nombre,
+      tipo,
+      descripcion,
+      duracion,
+      fecha_cobro,
+      template_id,
+    }).save();
 
-    await nuevaTareaMantenimiento.save();
     res
       .status(201)
       .json({ message: "Tarea de mantenimiento creada exitosamente" });
@@ -32,7 +36,7 @@ exports.createTareaMantenimiento = async (req, res) => {
   }
 };
 
-exports.getAllTareasMantenimiento = async (req, res) => {
+const getAllTareasMantenimiento = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -50,6 +54,7 @@ exports.getAllTareasMantenimiento = async (req, res) => {
     };
 
     const tareasMantenimiento = await TareaMantenimiento.find(searchCriteria)
+      .select(" -__v")
       .skip(skip)
       .limit(limit)
       .exec();
@@ -73,15 +78,25 @@ exports.getAllTareasMantenimiento = async (req, res) => {
   }
 };
 
-exports.getTareaMantenimientoById = async (req, res) => {
+const getTareaMantenimientoById = async (req, res) => {
   try {
-    const tareaMantenimiento = await TareaMantenimiento.findById(req.params.id);
+    const tareaMantenimiento = await TareaMantenimiento.findById(
+      req.params.id
+    ).select("-_id -__v");
     if (!tareaMantenimiento) {
       return res
         .status(404)
         .json({ message: "Tarea de mantenimiento no encontrada" });
     }
-    res.status(200).json({ message: "Tarea de mantenimiento encontrada" });
+
+    const fechaCobroCR = tareaMantenimiento.fecha_cobro
+      ? obtenerFechaCostaRica(tareaMantenimiento.fecha_cobro)
+      : null;
+
+    res.status(200).json({
+      ...tareaMantenimiento._doc,
+      fecha_cobro: fechaCobroCR,
+    });
   } catch (error) {
     res.status(500).json({
       message: "Error al buscar tarea de mantenimiento",
@@ -90,9 +105,12 @@ exports.getTareaMantenimientoById = async (req, res) => {
   }
 };
 
-exports.updateTareaMantenimiento = async (req, res) => {
+const updateTareaMantenimiento = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
-    const { nombre, tipo, descripcion } = req.body;
+    const { nombre, tipo, duracion, descripcion, fecha_cobro } = req.body;
 
     const tareaMantenimientoActual = await TareaMantenimiento.findById(
       req.params.id
@@ -103,33 +121,9 @@ exports.updateTareaMantenimiento = async (req, res) => {
         .json({ message: "Tarea de mantenimiento no encontrada" });
     }
 
-    const updates = {};
-    let isModified = false;
-
-    if (nombre && nombre !== tareaMantenimientoActual.nombre) {
-      updates.nombre = nombre;
-      isModified = true;
-    }
-
-    if (tipo && tipo !== tareaMantenimientoActual.tipo) {
-      updates.tipo = tipo;
-      isModified = true;
-    }
-
-    if (descripcion && descripcion !== tareaMantenimientoActual.descripcion) {
-      updates.descripcion = descripcion;
-      isModified = true;
-    }
-
-    if (!isModified) {
-      return res.status(200).json({
-        message: "La información es la misma, no se realizaron cambios.",
-      });
-    }
-
-    const tareaMantenimiento = await TareaMantenimiento.findByIdAndUpdate(
+    await TareaMantenimiento.findByIdAndUpdate(
       req.params.id,
-      { $set: updates },
+      { $set: { nombre, tipo, duracion, descripcion, fecha_cobro } },
       {
         new: true,
         runValidators: true,
@@ -147,7 +141,7 @@ exports.updateTareaMantenimiento = async (req, res) => {
   }
 };
 
-exports.deleteTareaMantenimiento = async (req, res) => {
+const deleteTareaMantenimiento = async (req, res) => {
   try {
     const tareaMantenimiento = await TareaMantenimiento.findByIdAndDelete(
       req.params.id
@@ -166,4 +160,12 @@ exports.deleteTareaMantenimiento = async (req, res) => {
       error: error.message,
     });
   }
+};
+
+module.exports = {
+  createTareaMantenimiento,
+  getAllTareasMantenimiento,
+  getTareaMantenimientoById,
+  updateTareaMantenimiento,
+  deleteTareaMantenimiento,
 };

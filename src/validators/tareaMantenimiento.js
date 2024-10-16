@@ -1,6 +1,5 @@
 const { body } = require("express-validator");
 
-// Validación y sanitización del nombre
 const validarNombre = body("nombre")
   .notEmpty()
   .withMessage("El nombre es requerido")
@@ -11,7 +10,6 @@ const validarNombre = body("nombre")
   .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/)
   .withMessage("El nombre solo puede contener letras y espacios");
 
-// Validación y sanitización del tipo
 const validarTipo = body("tipo")
   .notEmpty()
   .withMessage("El tipo es requerido")
@@ -20,7 +18,6 @@ const validarTipo = body("tipo")
   .isLength({ min: 3, max: 50 })
   .withMessage("El tipo debe tener entre 3 y 50 caracteres");
 
-// Validación y sanitización de la descripción
 const validarDescripcion = body("descripcion")
   .notEmpty()
   .withMessage("La descripción es requerida")
@@ -29,7 +26,6 @@ const validarDescripcion = body("descripcion")
   .isLength({ max: 500 })
   .withMessage("La descripción no puede tener más de 500 caracteres");
 
-// Validación de la duración
 const validarDuracion = body("duracion")
   .notEmpty()
   .withMessage("La duración es requerida")
@@ -38,7 +34,14 @@ const validarDuracion = body("duracion")
 // .matches(/^\d+(\.\d+)? (horas|minutos)$/i)
 // .withMessage("La duración debe estar en el formato 'n horas' o 'n minutos'");
 
-// Validación de template_id (ObjectId)
+const validarFechaCobro = body("fecha_cobro")
+  .notEmpty()
+  .withMessage("La fecha de cobro es requerida")
+  .isISO8601()
+  .withMessage(
+    "La fecha de cobro debe estar en un formato de fecha válido (ISO8601)"
+  );
+
 const validarTemplateId = body("template_id")
   .notEmpty()
   .withMessage("El template_id es requerido")
@@ -49,14 +52,17 @@ const validarTareaMantenimiento = [
   validarNombre,
   validarTipo,
   validarDescripcion,
+  validarFechaCobro,
   validarDuracion,
   validarTemplateId,
 ];
 
 const validarTareaMantenimientoUpdate = [
-  validarNombre,
-  validarDescripcion,
-  validarTipo,
+  validarNombre.optional(),
+  validarDescripcion.optional(),
+  validarTipo.optional(),
+  validarDuracion.optional(),
+  validarFechaCobro.optional(),
 ];
 
 module.exports = {
