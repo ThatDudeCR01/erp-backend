@@ -3,7 +3,6 @@ const router = express.Router();
 const { verifyToken } = require("../middleware/auth");
 
 const auth = require("./auth");
-
 const cliente = require("./clientes");
 const usuario = require("./usuarios");
 const roles = require("./roles");

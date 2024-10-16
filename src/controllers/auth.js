@@ -7,8 +7,7 @@ const Rol = require("../models/roles");
 // sgMail.setApiKey(process.env.NODE_SENDGRID_API_KEY);
 
 const login = async (req, res) => {
-  const { correo, contraseña } = req.body;
-
+  const { correo, password } = req.body;
   try {
     const usuario = await Usuario.findOne({ correo });
     if (!usuario) {
@@ -24,7 +23,7 @@ const login = async (req, res) => {
         .json({ message: "Rol no encontrado para el usuario." });
     }
 
-    const isMatch = await bcrypt.compare(contraseña, usuario.contraseña);
+    const isMatch = await bcrypt.compare(password, usuario.contraseña);
     if (!isMatch) {
       return res
         .status(400)

@@ -56,7 +56,7 @@ const getAllProductos = async (req, res) => {
     };
 
     const productos = await Producto.find(searchCriteria)
-      .select("nombre precio tipo -_id")
+      .select("nombre precio tipo")
       .skip(skip)
       .limit(limit)
       .exec();

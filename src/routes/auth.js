@@ -1,5 +1,5 @@
 const express = require("express");
-const { login, passwordReset, resetPassword } = require("../controllers/auth"); // Importar el controlador de autenticación
+const { login, passwordReset, resetPassword } = require("../controllers/auth");
 const router = express.Router();
 
 router.post("/", login);
