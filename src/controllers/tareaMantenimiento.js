@@ -39,7 +39,7 @@ const createTareaMantenimiento = async (req, res) => {
 const getAllTareasMantenimiento = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
     const filter = req.query.filter || "";
 
@@ -54,7 +54,7 @@ const getAllTareasMantenimiento = async (req, res) => {
     };
 
     const tareasMantenimiento = await TareaMantenimiento.find(searchCriteria)
-      .select("-_id -__v")
+      .select(" -__v")
       .skip(skip)
       .limit(limit)
       .exec();
