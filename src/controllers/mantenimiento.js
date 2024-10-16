@@ -30,7 +30,6 @@ const createMantenimiento = async (req, res) => {
         tipo: tarea.tipo,
         descripcion: tarea.descripcion,
         duracion: tarea.duracion,
-        template_id: tarea.template_id,
       };
     });
 
