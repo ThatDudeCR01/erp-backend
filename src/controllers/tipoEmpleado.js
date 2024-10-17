@@ -1,12 +1,17 @@
 const TipoEmpleado = require("../models/tipo-empleado");
+const handleValidationErrors = require("../config/validateResult");
 
 const createTipoEmpleado = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
-    const { nombre, horasFacturables_id } = req.body;
+    const { nombre, horasFacturables_id, tarifa } = req.body;
 
     const nuevoTipoEmpleado = new TipoEmpleado({
       nombre,
       horasFacturables_id,
+      tarifa,
     });
 
     await nuevoTipoEmpleado.save();
@@ -58,9 +63,8 @@ const getAllTiposEmpleado = async (req, res) => {
 
 const getTipoEmpleadoById = async (req, res) => {
   try {
-    const tipoEmpleado = await TipoEmpleado.findById(req.params.id).populate(
-      "empleado_id"
-    );
+    const tipoEmpleado = await TipoEmpleado.findById(req.params.id);
+
     if (!tipoEmpleado) {
       return res
         .status(404)
@@ -78,7 +82,11 @@ const getTipoEmpleadoById = async (req, res) => {
 };
 
 const updateTipoEmpleado = async (req, res) => {
+  if (handleValidationErrors(req, res)) {
+    return;
+  }
   try {
+    const { nombre, tarifa } = req.body;
     const tipoEmpleadoActual = await TipoEmpleado.findById(req.params.id);
     if (!tipoEmpleadoActual) {
       return res
@@ -88,7 +96,7 @@ const updateTipoEmpleado = async (req, res) => {
 
     const tipoEmpleado = await TipoEmpleado.findByIdAndUpdate(
       req.params.id,
-      { $set: req.body },
+      { $set: { nombre, tarifa } },
       {
         new: true,
         runValidators: true,
