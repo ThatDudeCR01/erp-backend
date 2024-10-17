@@ -116,46 +116,18 @@ const updateCliente = async (req, res) => {
     return;
   }
   try {
-    const {
-      nombre,
-      apellido,
-      estaActivo,
-      telefono,
-      tarifa_id,
-      precio,
-      descripcion,
-    } = req.body;
+    const { nombre, apellido, estaActivo, telefono, tarifa } = req.body;
 
-    const updateFields = { nombre, apellido, estaActivo, telefono };
     const checkCliente = await Cliente.findById(req.params.id);
 
     if (!checkCliente) {
       return res.status(404).json({ message: "Cliente no encontrado" });
     }
-
-    if (tarifa_id) {
-      if (precio !== undefined) updateFields["tarifa.$[elem].precio"] = precio;
-      if (descripcion !== undefined)
-        updateFields["tarifa.$[elem].descripcion"] = descripcion;
-    }
-
-    const options = {
-      new: true,
-      runValidators: true,
-    };
-    if (tarifa_id) {
-      options.arrayFilters = [{ "elem._id": tarifa_id }];
-    }
-
-    const updatedCliente = await Cliente.findByIdAndUpdate(
+    await Cliente.findByIdAndUpdate(
       req.params.id,
-      { $set: updateFields },
-      options
+      { $set: { nombre, apellido, estaActivo, telefono, tarifa } },
+      { new: true, runValidators: true }
     );
-
-    if (!updatedCliente) {
-      return res.status(404).json({ message: "Cliente no encontrado" });
-    }
 
     res.status(200).json({ message: "Cliente actualizado con éxito" });
   } catch (error) {
