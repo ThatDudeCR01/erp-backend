@@ -26,7 +26,14 @@ const validarCorreo = body("correo")
   .trim()
   .isEmail()
   .withMessage("Debe ser un correo electrónico válido")
-  .normalizeEmail();
+  .normalizeEmail()
+  .custom((value) => {
+    const [localPart] = value.split("@");
+    if (!localPart) {
+      throw new Error("El correo no puede estar vacío antes del '@'");
+    }
+    return true;
+  });
 
 const validarTelefono = body("telefono")
   .optional()

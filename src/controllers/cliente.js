@@ -7,7 +7,8 @@ const createCliente = async (req, res) => {
   }
 
   try {
-    const { nombre, cedula, apellido, correo, telefono, entidad_id } = req.body;
+    const { nombre, cedula, apellido, correo, telefono, tarifa, entidad_id } =
+      req.body;
 
     const clienteDuplicado = await Cliente.findOne({
       $or: [{ correo: correo }, { cedula: cedula }, { entidad_id: entidad_id }],
@@ -43,6 +44,7 @@ const createCliente = async (req, res) => {
       correo,
       telefono,
       entidad_id,
+      tarifa,
     });
 
     await nuevoCliente.save();
@@ -73,7 +75,7 @@ const getAllClientes = async (req, res) => {
     };
 
     const clientes = await Cliente.find(searchCriteria)
-      .select("nombre apellido telefono -_id")
+
       .skip(skip)
       .limit(limit)
       .exec();
@@ -97,9 +99,7 @@ const getAllClientes = async (req, res) => {
 
 const getClienteById = async (req, res) => {
   try {
-    const cliente = await Cliente.findById(req.params.id).select(
-      "nombre apellido telefono -_id"
-    );
+    const cliente = await Cliente.findById(req.params.id);
     if (!cliente) {
       return res.status(404).json({ message: "Cliente no encontrado" });
     }
@@ -116,16 +116,18 @@ const updateCliente = async (req, res) => {
     return;
   }
   try {
+    const { nombre, apellido, estaActivo, telefono, tarifa } = req.body;
+
     const checkCliente = await Cliente.findById(req.params.id);
 
     if (!checkCliente) {
       return res.status(404).json({ message: "Cliente no encontrado" });
     }
-
-    await Cliente.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    await Cliente.findByIdAndUpdate(
+      req.params.id,
+      { $set: { nombre, apellido, estaActivo, telefono, tarifa } },
+      { new: true, runValidators: true }
+    );
 
     res.status(200).json({ message: "Cliente actualizado con éxito" });
   } catch (error) {
