@@ -7,6 +7,12 @@ const clienteSchema = new mongoose.Schema({
   correo: { type: String, required: true, unique: true },
   telefono: { type: String },
   cedula: { type: String, required: true, unique: true },
+  tarifa: [
+    {
+      precio: { type: Number, required: true },
+      descripcion: { type: String, required: true },
+    },
+  ],
   entidad_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Entidad",
