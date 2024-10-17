@@ -7,15 +7,18 @@ const {
   deleteTipoEmpleado,
 } = require("../controllers/tipoEmpleado");
 const router = express.Router();
-const tipoEmpleadoValidacion = require("../validators/tipoEmpleado");
-
-router.get("/", getAllTiposEmpleado);
+const {
+  tipoEmpleadoValidacion,
+  tipoEmpleadoActualizacionValidacion,
+} = require("../validators/tipoEmpleado");
 
 router.post("/", tipoEmpleadoValidacion, createTipoEmpleado);
 
+router.get("/", getAllTiposEmpleado);
+
 router.get("/:id", getTipoEmpleadoById);
 
-router.put("/:id", tipoEmpleadoValidacion, updateTipoEmpleado);
+router.patch("/:id", tipoEmpleadoActualizacionValidacion, updateTipoEmpleado);
 
 router.delete("/:id", deleteTipoEmpleado);
 
