@@ -1,22 +1,57 @@
 const Proyecto = require("../models/proyecto");
+const Cliente = require("../models/cliente");
+const Empresa = require("../models/empresa");
 const handleValidationErrors = require("../config/validateResult");
 
 const createProyecto = async (req, res) => {
   if (handleValidationErrors(req, res)) {
     return;
   }
+
   try {
-    const { nombre, duracion, descripcion, empresa_id } = req.body;
+    const {
+      nombre,
+      duracion,
+      descripcion,
+      referencia,
+      referenciaModelo,
+      horas_facturable_id,
+    } = req.body;
+
+    if (!["Cliente", "Empresa"].includes(referenciaModelo)) {
+      return res
+        .status(400)
+        .json({ error: "El modelo de referencia debe ser Cliente o Empresa" });
+    }
+
+    let referenciaExiste;
+    if (referenciaModelo === "Cliente") {
+      referenciaExiste = await Cliente.findById(referencia);
+    } else if (referenciaModelo === "Empresa") {
+      referenciaExiste = await Empresa.findById(referencia);
+    }
+
+    if (!referenciaExiste) {
+      return res.status(404).json({
+        error: `No se encontró el ${referenciaModelo.toLowerCase()} con ese ID`,
+      });
+    }
 
     const nuevoProyecto = new Proyecto({
       nombre,
       duracion,
       descripcion,
-      empresa_id,
+      referencia,
+      referenciaModelo,
+      horas_facturable_id,
     });
 
     await nuevoProyecto.save();
-    res.status(201).json({ message: "Proyecto creado exitosamente" });
+
+    res.status(201).json({
+      message: "Proyecto creado exitosamente",
+      proyecto: nuevoProyecto,
+    });
   } catch (error) {
     res
       .status(400)
@@ -41,7 +76,7 @@ const getAllProyectos = async (req, res) => {
     };
 
     const proyectos = await Proyecto.find(searchCriteria)
-      .select("nombre duracion descripcion -_id")
+      .select(" -_id")
       .skip(skip)
       .limit(limit)
       .exec();
@@ -65,9 +100,7 @@ const getAllProyectos = async (req, res) => {
 
 const getProyectoById = async (req, res) => {
   try {
-    const proyecto = await Proyecto.findById(req.params.id).select(
-      "nombre duracion descripcion -_id"
-    );
+    const proyecto = await Proyecto.findById(req.params.id).select("-_id");
     if (!proyecto) {
       return res.status(404).json({ message: "Proyecto no encontrado" });
     }
@@ -84,7 +117,7 @@ const updateProyecto = async (req, res) => {
     return;
   }
   try {
-    const { nombre, duracion, descripcion, empresa_id } = req.body;
+    const { nombre, duracion, descripcion } = req.body;
 
     const proyectoActual = await Proyecto.findById(req.params.id);
     if (!proyectoActual) {

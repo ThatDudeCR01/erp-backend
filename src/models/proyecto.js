@@ -4,11 +4,16 @@ const proyectoSchema = new mongoose.Schema({
   nombre: { type: String, required: true },
   duracion: { type: Number, required: true },
   descripcion: { type: String, required: true },
-  estaActivo: { type: Boolean },
-  empresa_id: {
+  estaActivo: { type: Boolean, default: true },
+  referencia: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Empresa",
+    refPath: "referenciaModelo",
     required: true,
+  },
+  referenciaModelo: {
+    type: String,
+    required: true,
+    enum: ["Cliente", "Empresa"],
   },
   horas_facturable_id: {
     type: mongoose.Schema.Types.ObjectId,
