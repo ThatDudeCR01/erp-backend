@@ -1,9 +1,5 @@
 const { body } = require("express-validator");
-const mongoose = require("mongoose");
-const Empresa = require("../models/empresa"); // Importa el modelo de Empresa
-const Proyecto = require("../models/proyecto");
 
-// Validación para el campo nombre
 const validarNombre = body("nombre")
   .notEmpty()
   .withMessage("El nombre es requerido")
@@ -14,14 +10,12 @@ const validarNombre = body("nombre")
   .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/)
   .withMessage("El nombre solo puede contener letras y espacios");
 
-// Validación para el campo duracion
 const validarDuracion = body("duracion")
   .notEmpty()
   .withMessage("La duración es requerida")
   .isInt({ gt: 0 })
   .withMessage("La duración debe ser un número entero mayor que 0");
 
-// Validación para el campo descripcion
 const validarDescripcion = body("descripcion")
   .notEmpty()
   .withMessage("La descripción es requerida")
@@ -32,57 +26,40 @@ const validarDescripcion = body("descripcion")
   .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s,\.]+$/)
   .withMessage("La descripcion solo puede contener letras y espacios");
 
-// Validación para el campo empresa_id
-const validarEmpresaId = body("empresa_id")
+const validarReferencia = body("referencia")
   .notEmpty()
-  .withMessage("Debe proporcionar un ID de empresa")
-  .custom(async (value) => {
-    if (!mongoose.Types.ObjectId.isValid(value)) {
-      throw new Error("El ID de la empresa no es válido");
-    }
+  .withMessage("La referencia es obligatoria")
+  .isMongoId()
+  .withMessage("La referencia debe ser un ID válido de MongoDB");
 
-    // Verifica si la empresa existe en la base de datos
-    const empresaExistente = await Empresa.findById(value);
-    if (!empresaExistente) {
-      throw new Error("La empresa no se encontró en la base de datos");
-    }
-
-    return true;
-  });
-
-const validarProyectoId = body("proyecto_id")
+const validarReferenciaModelo = body("referenciaModelo")
   .notEmpty()
-  .withMessage("Debe proporcionar el ID de un proyecto")
-  .custom(async (value) => {
-    if (!mongoose.Types.ObjectId.isValid(value)) {
-      throw new Error("El ID del proyecto no es válido");
-    }
+  .withMessage("El modelo de referencia es obligatorio")
+  .isIn(["Cliente", "Empresa"])
+  .withMessage("El modelo de referencia debe ser 'Cliente' o 'Empresa'");
 
-    // Verifica si la empresa existe en la base de datos
-    const empresaExistente = await Proyecto.findById(value);
-    if (!empresaExistente) {
-      throw new Error("El proyecto no se encontró en la base de datos");
-    }
+const validarHorasFacturableId = body("horas_facturable_id")
+  .notEmpty()
+  .withMessage("El ID de horas facturables es obligatorio")
+  .isMongoId()
+  .withMessage("El ID de horas facturables debe ser un ID válido de MongoDB");
 
-    return true;
-  });
-
-// Agrupación de validaciones para la creación de un proyecto
 const proyectoValidacion = [
   validarNombre,
   validarDuracion,
   validarDescripcion,
-  validarEmpresaId,
+  validarReferencia,
+  validarReferenciaModelo,
+  validarHorasFacturableId,
 ];
 
 const actualizarProductoValidacion = [
-  validarNombre,
-  validarDuracion,
-  validarDescripcion,
+  validarNombre.optional(),
+  validarDuracion.optional(),
+  validarDescripcion.optional(),
 ];
 
 module.exports = {
   proyectoValidacion,
   actualizarProductoValidacion,
-  validarProyectoId,
 };

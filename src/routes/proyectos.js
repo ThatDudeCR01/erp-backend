@@ -8,11 +8,10 @@ const {
 } = require("../controllers/proyecto");
 
 const router = express.Router();
-const { validationResult } = require("express-validator");
+
 const {
   proyectoValidacion,
   actualizarProductoValidacion,
-  validarProyectoId,
 } = require("../validators/proyecto");
 
 router.post("/", proyectoValidacion, createProyecto);
@@ -23,6 +22,6 @@ router.get("/:id", getProyectoById);
 
 router.patch("/:id", actualizarProductoValidacion, updateProyecto);
 
-router.delete("/:id", validarProyectoId, deleteProyecto);
+router.delete("/:id", deleteProyecto);
 
 module.exports = router;
