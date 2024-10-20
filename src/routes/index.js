@@ -4,6 +4,7 @@ const { verifyToken } = require("../middleware/auth");
 
 const auth = require("./auth");
 const cliente = require("./clientes");
+const factura = require("./facturas");
 const usuario = require("./usuarios");
 const roles = require("./roles");
 const empleado = require("./empleados");
@@ -27,6 +28,7 @@ router.use(verifyToken);
 
 router.use("/entidades", entidad);
 router.use("/usuarios", usuario);
+router.use("/facturas", factura);
 router.use("/roles", roles);
 router.use("/contactos", contacto);
 router.use("/empleados", empleado);
