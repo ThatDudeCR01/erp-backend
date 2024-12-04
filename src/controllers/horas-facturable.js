@@ -75,7 +75,9 @@ const getHorasFacturablesById = async (req, res) => {
         .status(404)
         .json({ message: "Horas facturables no encontradas" });
     }
-    res.status(200).json({ message: "Horas facturables encontradas" });
+    res
+      .status(200)
+      .json({ message: "Horas facturables encontradas", horasFacturables });
   } catch (error) {
     res.status(500).json({
       message: "Error al buscar horas facturables",

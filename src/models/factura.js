@@ -22,14 +22,13 @@ const facturaSchema = new mongoose.Schema({
       precio: { type: Number, required: true },
       cantidad: { type: Number, required: true },
       total_producto: { type: Number, required: true },
-      producto_id: [
-        {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Producto",
-          required: true,
-        },
-      ],
+      producto_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Producto",
+        required: true,
+      },
     },
+    ,
   ],
 
   linea_detalle_proyecto: {
