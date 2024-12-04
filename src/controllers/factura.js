@@ -21,12 +21,17 @@ const crearFactura = async (req, res) => {
         .json({ error: "El modelo de referencia debe ser Cliente o Empresa" });
     }
 
-    let referenciaExiste;
-    if (referenciaModelo === "Cliente") {
-      referenciaExiste = await Cliente.findById(referenciaId);
-    } else if (referenciaModelo === "Empresa") {
-      referenciaExiste = await Empresa.findById(referenciaId);
+    if (!productos || !Array.isArray(productos) || productos.length === 0) {
+      return res.status(400).json({
+        error:
+          "El campo 'productos' debe ser un array con al menos un elemento.",
+      });
     }
+
+    const referenciaExiste =
+      referenciaModelo === "Cliente"
+        ? await Cliente.findById(referenciaId)
+        : await Empresa.findById(referenciaId);
 
     if (!referenciaExiste) {
       return res.status(404).json({

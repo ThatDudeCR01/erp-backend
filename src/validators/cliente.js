@@ -80,9 +80,9 @@ const clienteValidacion = [
 ];
 
 const actualizarClienteValidacion = [
-  validarNombre,
-  validarApellido,
-  validarTelefono,
+  validarNombre.optional(),
+  validarApellido.optional(),
+  validarTelefono.optional(),
 ];
 
 module.exports = {

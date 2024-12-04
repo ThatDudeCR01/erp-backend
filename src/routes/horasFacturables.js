@@ -17,7 +17,7 @@ router.get("/", getAllHorasFacturables);
 
 router.get("/:id", getHorasFacturablesById);
 
-router.put("/:id", updateHorasFacturables);
+router.patch("/:id", updateHorasFacturables);
 
 router.delete("/:id", deleteHorasFacturables);
 
